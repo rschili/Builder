@@ -5,6 +5,7 @@ Introduction
 ------------
 
 I mostly wrote this for myself both as a programming practice and as a tool that I will use myself on a daily basis.
+![Picture of Main Window](Builder/doc/main.png)
 
 Dependencies
 ------------
@@ -26,4 +27,4 @@ External Dependencies
 User documentation
 ------------------
 
-[Documentation](Builder/docs/Readme.md)
+[Documentation](Builder/doc/Readme.md)
