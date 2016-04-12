@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Builder", "Builder\Builder.csproj", "{B80F5CDC-E7C9-4E13-A9E6-8702B122F1F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RSCoreLib", "..\RSCoreLib\RSCoreLib\RSCoreLib.csproj", "{361D18F7-66CA-423F-8124-B549CECF203A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{09942A15-5DF0-417A-8F9D-A2E578676BE5}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B80F5CDC-E7C9-4E13-A9E6-8702B122F1F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B80F5CDC-E7C9-4E13-A9E6-8702B122F1F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B80F5CDC-E7C9-4E13-A9E6-8702B122F1F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B80F5CDC-E7C9-4E13-A9E6-8702B122F1F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{361D18F7-66CA-423F-8124-B549CECF203A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{361D18F7-66CA-423F-8124-B549CECF203A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{361D18F7-66CA-423F-8124-B549CECF203A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{361D18F7-66CA-423F-8124-B549CECF203A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
