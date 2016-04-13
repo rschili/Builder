@@ -145,6 +145,7 @@ namespace Builder
             set
                 {
                 Model.ShellCommands = value;
+                IsDirty = true;
                 OnPropertyChanged();
                 }
             }
@@ -208,25 +209,48 @@ namespace Builder
 
             BootstrapCommand.Handler = p => Parent?.RunOperation(Bootstrap, "Bootstrap", p);
             BootstrapCommand.CanExecuteHandler = canExecuteHandler;
+
+            AddConfigurationCommand.Handler = AddConfiguration;
+            }
+
+
+        public SimpleCommand AddConfigurationCommand { get; } = new SimpleCommand();
+        private void AddConfiguration (object obj)
+            {
+            Window mainWindow = Application.Current.MainWindow;
+            if (mainWindow == null)
+                return;
+
+            ConfigurationPropertiesDialog dialog = new ConfigurationPropertiesDialog();
+            dialog.DataContext = new ConfigurationVM(this);
+            dialog.Owner = mainWindow;
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            if (dialog.ShowDialog() == true)
+                {
+                ConfigurationVM result = (ConfigurationVM)dialog.DataContext;
+
+                Configurations.Insert(0, result);
+                if (!IsExpanded)
+                    IsExpanded = true;
+
+                result.IsSelected = true;
+                Parent.EnvironmentIsDirty();
+                }
             }
 
         public SimpleCommand ShowPropertiesCommand { get; } = new SimpleCommand();
         private void ShowProperties (object obj)
             {
-            Window mainWindow = null;
-            lock (Parent)
-                {
-                mainWindow = Application.Current.MainWindow;
-                if (mainWindow == null)
-                    return;
+            if (Parent == null)
+                return;
 
-                if (Parent == null)
-                    return;
-                }
+            Window mainWindow = Application.Current.MainWindow;
+            if (mainWindow == null)
+                return;
 
             SourceDirectoryPropertiesDialog dialog = new SourceDirectoryPropertiesDialog();
             dialog.DataContext = Copy();
-            dialog.Owner = Application.Current.MainWindow;
+            dialog.Owner = mainWindow;
             dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             if (dialog.ShowDialog() == true)
                 {
@@ -239,11 +263,7 @@ namespace Builder
                 OnPropertyChanged(nameof(SrcPath));
                 OnPropertyChanged(nameof(Stream));
 
-                var collection = Parent.SourceDirectories;
-                lock (collection)
-                    {
-                    Parent.EnvironmentIsDirty();
-                    }
+                Parent.EnvironmentIsDirty();
                 }
             }
 

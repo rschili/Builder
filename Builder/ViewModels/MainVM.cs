@@ -64,6 +64,8 @@ namespace Builder
 
             TestCommand.Handler = p => RunOperation(Test, "TEST", p);
             TestCommand.CanExecuteHandler = (_) => !OperationIsRunning;
+
+            AddSourceDirectoryCommand.Handler = AddSourceDirectory;
             }
 
         #region Settings,History
@@ -238,6 +240,26 @@ namespace Builder
             return success.Next(0, 10) >= 5 ? OperationResult.Finished : OperationResult.Failed;
             }
 
+        public SimpleCommand AddSourceDirectoryCommand { get; } = new SimpleCommand();
+        private void AddSourceDirectory (object obj)
+            {
+            Window mainWindow = Application.Current.MainWindow;
+            if (mainWindow == null)
+                return;
+
+            SourceDirectoryPropertiesDialog dialog = new SourceDirectoryPropertiesDialog();
+            dialog.DataContext = new SourceDirectoryVM(this);
+            dialog.Owner = mainWindow;
+            dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            if (dialog.ShowDialog() == true)
+                {
+                SourceDirectoryVM result = (SourceDirectoryVM)dialog.DataContext;
+
+                SourceDirectories.Insert(0, result);
+                result.IsSelected = true;
+                EnvironmentIsDirty();
+                }
+            }
         #endregion
 
         #region Operation Execution management

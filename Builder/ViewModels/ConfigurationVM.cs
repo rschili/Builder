@@ -192,6 +192,7 @@ namespace Builder
             set
                 {
                 Model.ShellCommands = value;
+                IsDirty = true;
                 OnPropertyChanged();
                 }
             }
@@ -209,20 +210,16 @@ namespace Builder
 
         private void ShowProperties (object obj)
             {
-            Window mainWindow = null;
-            lock (Parent)
-                {
-                mainWindow = Application.Current.MainWindow;
-                if (mainWindow == null)
-                    return;
+            if (Parent == null)
+                return;
 
-                if (Parent == null)
-                    return;
-                }
+            Window mainWindow = Application.Current.MainWindow;
+            if (mainWindow == null)
+                return;
 
             ConfigurationPropertiesDialog dialog = new ConfigurationPropertiesDialog();
             dialog.DataContext = Copy();
-            dialog.Owner = Application.Current.MainWindow;
+            dialog.Owner = mainWindow;
             dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             using (Parent.Parent.Progress.ReportIndeterminate())
                 {

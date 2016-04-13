@@ -10,6 +10,8 @@ Because of that, it is tailored to my personal needs, it is by no means a compre
 The primary focus is on **building** stuff. For source control there is Tortoise hg.
 There are a few handy source control features baked into the tool, like triggering a pull, bootstrap, or displaying incoming changes.
 
+**This Application requires .NET Framework 4.6.1 to run.** You can download it [here](https://www.microsoft.com/en-us/download/details.aspx?id=49981) for Windows 7 and later.
+
 Main Window
 -----------
 

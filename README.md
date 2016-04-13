@@ -5,6 +5,12 @@ Introduction
 ------------
 
 I mostly wrote this for myself both as a programming practice and as a tool that I will use myself on a daily basis.
+For people not working for my company, this tool will be pretty pointless, but you can still have a look.
+
+You will not find a lot of comments or tests for this thing, but I try to keep the general code quality high. WPF developers know that there are always many solutions to a given problem, and I'm looking as long as it takes to find one that feels right. Which is harder than it sounds. I am constantly refactoring this code and try to use the approaches that seem best to me.
+
+**This Application requires .NET Framework 4.6.1 to run.** You can download it [here](https://www.microsoft.com/en-us/download/details.aspx?id=49981) for Windows 7 and later.
+
 ![Picture of Main Window](Builder/doc/main.png)
 
 Dependencies

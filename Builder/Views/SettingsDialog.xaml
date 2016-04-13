@@ -82,7 +82,7 @@
                 </ComboBox>
 
                 <TextBlock Grid.Row="6"  Text="TCC LE Shell Usage" Style="{StaticResource Caption}" />
-                <ComboBox Grid.Row="6" Grid.Column="2" HorizontalAlignment="Right" MinWidth="150" ItemsSource="{x:Static local:TCCLeUsages.Values}"
+                <ComboBox Grid.Row="6" Grid.Column="2" HorizontalAlignment="Right" MinWidth="100" ItemsSource="{x:Static local:TCCLeUsages.Values}"
                     SelectedItem="{Binding TCCLeUsage}">
                     <ComboBox.Resources>
                         <local:TCCLeUsageToLabelConverter x:Key="TCCLeUsageToLabel" />
@@ -98,7 +98,8 @@
                 <TextBox Grid.Row="8" Grid.Column="2" HorizontalAlignment="Stretch" MinWidth="150" Text="{Binding TCCLePath}" IsEnabled="{Binding TCCLePathEnabled}" ToolTip="Full path the the tcc.exe executable." />
 
                 <TextBlock Grid.Row="12"  Text="Global Shell Commands" Style="{StaticResource Caption}" />
-                <TextBox Grid.Row="13" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" MinWidth="150" Text="{Binding ShellCommands}" HorizontalScrollBarVisibility="Auto" mah:TextBoxHelper.Watermark="Commands to run on every shell." VerticalScrollBarVisibility="Visible" Height="150" />
+                <TextBox Grid.Row="13" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" MinWidth="150" Text="{Binding ShellCommands}"
+                 HorizontalScrollBarVisibility="Auto" mah:TextBoxHelper.Watermark="Commands to run on every shell." VerticalScrollBarVisibility="Visible" Height="120" AcceptsReturn="True" />
 
                 <TextBlock Grid.Row="15" Text="Internal Functions" Style="{StaticResource Caption}" />
                 <WrapPanel Grid.Row="16" Grid.ColumnSpan="3" Margin="0,0,5,0" HorizontalAlignment="Right">

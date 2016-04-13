@@ -60,7 +60,7 @@
             <TreeView.Resources>
                 <ContextMenu x:Key="RootContextMenu" Placement="Bottom">
                     <MenuItem Header="Add">
-                        <MenuItem Header="New Item..." Command="{StaticResource NullCommand}" />
+                        <MenuItem Header="New Source Directory..." Command="{Binding AddSourceDirectoryCommand}" />
                         <MenuItem Header="Existing Item..." Command="{StaticResource NullCommand}" />
                         <Separator />
                         <MenuItem Header="Scan Machine (Auto-Detect)" Command="{Binding ScanForEnvironmentsCommand}" >
@@ -92,7 +92,7 @@
                     <MenuItem Header="Open Folder in File Explorer" FontWeight="Bold" InputGestureText="Enter" Command="{Binding NavigateToCommand}" />
                     <Separator />
                     <MenuItem Header="Add">
-                        <MenuItem Header="New Item..." Command="{StaticResource NullCommand}" />
+                        <MenuItem Header="New Configuration..." Command="{Binding AddConfigurationCommand}" />
                     </MenuItem>
                     <MenuItem Header="Bootstrap" Command="{Binding BootstrapCommand}" />
                     <Separator />

@@ -56,7 +56,7 @@
                 <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding Stream}" />
 
                 <TextBlock Grid.Row="6"  Text="Additional Shell Commands" Style="{StaticResource Caption}" />
-                <TextBox Grid.Row="7" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" MinWidth="150" Text="{Binding ShellCommands}" HorizontalScrollBarVisibility="Auto" mah:TextBoxHelper.Watermark="Commands to run on every shell." VerticalScrollBarVisibility="Visible" Height="120" />
+                <TextBox Grid.Row="7" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" MinWidth="150" Text="{Binding ShellCommands}" HorizontalScrollBarVisibility="Auto" mah:TextBoxHelper.Watermark="Commands to run on every shell." VerticalScrollBarVisibility="Visible" Height="120" AcceptsReturn="True" />
             </Grid>
         </ScrollViewer>
     </DockPanel>

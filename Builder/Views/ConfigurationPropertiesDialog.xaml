@@ -61,7 +61,7 @@
                 <mah:ToggleSwitch Grid.Row="6" Grid.ColumnSpan="3" OnLabel="Release" OffLabel="Debug" IsChecked="{Binding Release}" HorizontalAlignment="Right" FontFamily="{DynamicResource {x:Static SystemFonts.CaptionFontFamilyKey}}" />
 
                 <TextBlock Grid.Row="8"  Text="Additional Shell Commands" Style="{StaticResource Caption}" />
-                <TextBox Grid.Row="9" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" MinWidth="150" Text="{Binding ShellCommands}" HorizontalScrollBarVisibility="Auto" mah:TextBoxHelper.Watermark="Commands to run on every shell." VerticalScrollBarVisibility="Visible" Height="120" />
+                <TextBox Grid.Row="9" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" MinWidth="150" Text="{Binding ShellCommands}" HorizontalScrollBarVisibility="Auto" mah:TextBoxHelper.Watermark="Commands to run on every shell." VerticalScrollBarVisibility="Visible" Height="120" AcceptsReturn="True" />
             </Grid>
         </ScrollViewer>
     </DockPanel>
