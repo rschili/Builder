@@ -101,13 +101,26 @@ namespace Builder
         #region Sqlite
         public const string DB_FILENAME = "db.sqlite";
 
-        public const string BUILD_TABLENAME = "BUILD";
-        private const string BUILD_SCHEMA = "CREATE TABLE " + BUILD_TABLENAME + "(id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "command TEXT, executed DATETIME, secondsDuration INTEGER, code INTEGER)";
+        public const string HISTORY_TABLENAME = "HISTORY";
+        private const string HISTORY_SCHEMA = "CREATE TABLE " + HISTORY_TABLENAME + "(id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "command TEXT," +
+            "startTime DATETIME,"+
+            "buildStrategy TEXT," +
+            "stream TEXT," +
+            "sourceDir TEXT," +
+            "outDir TEXT," +
+            "release INTEGER," +
+            "platform TEXT," +
+            "resultCode INTEGER," +
+            "secondsDuration INTEGER" +
+            ")";
 
-        public const string BUILDOUTPUT_TABLENAME = "BUILD_OUTPUT";
-        private const string BUILDOUTPUT_SCHEMA = "CREATE TABLE " + BUILDOUTPUT_TABLENAME + "(id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "code INTEGER, line TEXT,buildid INTEGER NOT NULL, FOREIGN KEY (buildid) REFERENCES builds(id) ON DELETE CASCADE ON UPDATE CASCADE )";
+        public const string HISTORY_MESSAGE_TABLENAME = "HISTORY_MESSAGE";
+        private const string HISTORY_MESSAGE_SCHEMA = "CREATE TABLE " + HISTORY_MESSAGE_TABLENAME + "(id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "code INTEGER," +
+            "message TEXT," +
+            "buildid INTEGER NOT NULL," +
+            "FOREIGN KEY (buildid) REFERENCES builds(id) ON DELETE CASCADE ON UPDATE CASCADE )";
 
         public const string STREAM_TABLENAME = "STREAM";
         private const string STREAM_SCHEMA = "CREATE TABLE " + STREAM_TABLENAME + "(name TEXT NOT NULL UNIQUE, code INTEGER)";
@@ -115,9 +128,8 @@ namespace Builder
 
         public static readonly IDictionary<string, string> DbTables = new Dictionary<string, string>()
             {
-            [BUILD_TABLENAME] = BUILD_SCHEMA,
-            [BUILDOUTPUT_TABLENAME] = BUILDOUTPUT_SCHEMA,
-            [STREAM_TABLENAME] = STREAM_SCHEMA
+            [HISTORY_TABLENAME] = HISTORY_SCHEMA,
+            [HISTORY_MESSAGE_TABLENAME] = HISTORY_MESSAGE_SCHEMA
             };
 
         private static string InitializeSqlite ()

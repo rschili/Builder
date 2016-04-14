@@ -11,6 +11,54 @@ namespace Builder
     public static class JobImplementations
         {
         private static readonly ILog log = LogManager.GetLogger(typeof(JobImplementations));
+
+        internal class JobContext<T> : IDisposable
+            {
+            internal StreamWriter Log { get; }
+            internal ProgressViewModel Progress { get; }
+            internal CancellationToken CancellationToken { get; }
+            internal string Command { get; }
+            internal T Information { get; }
+
+            internal JobContext (CancellationToken cancellationToken, ProgressViewModel progress, string fileName, string command, T info)
+                {
+                Log = new StreamWriter(AppDataManager.GetAppDataPath(fileName + ".log"), false);
+                Progress = progress;
+                CancellationToken = cancellationToken;
+                Command = command;
+                Information = info;
+                }
+
+            public void Dispose ()
+                {
+                Log.Dispose();
+                }
+            }
+
+        internal static OperationResult Execute<T> (CommandLineSandbox shell, JobContext<T> context, T result, Action<JobContext<T>, ShellOutput> lineProcessor)
+            {
+            try
+                {
+                using (shell)
+                using (context)
+                    {
+                    context.CancellationToken.Register(() => shell.Dispose(true));
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                    shell.ExecuteCommand(SET_UNBUFFERED_COMMAND);
+                    shell.OutputHandler = o => lineProcessor(context, o);
+                    return shell.ExecuteCommand(context.Command).Success ? OperationResult.Success : OperationResult.Failed;
+                    }
+                }
+            catch (Exception e)
+                {
+                if (context.CancellationToken.IsCancellationRequested)
+                    return OperationResult.Aborted;
+
+                log.ErrorFormat("Exception during command {0}:{1}", context.Command, e.Message);
+                throw;
+                }
+            }
+
         internal static OperationResult Bootstrap (CancellationToken cancellationToken, ProgressViewModel progress, string path, string stream)
             {
             int counter = 0;
