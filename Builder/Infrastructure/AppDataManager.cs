@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using log4net;
 using Newtonsoft.Json;
+using RSCoreLib;
 
 namespace Builder
     {
@@ -21,6 +22,11 @@ namespace Builder
                 return appDataDir.Value;
 
             return Path.Combine(appDataDir.Value, fileName);
+            }
+
+        public static string GetLogFilePath(long id)
+            {
+            return GetAppDataPath(Path.Combine("logs", StringEncoder.ToString(id, StringEncoder.BASE36CHARS) + ".txt"));
             }
 
         public static void SaveAppDataFile (string fileName, string content)

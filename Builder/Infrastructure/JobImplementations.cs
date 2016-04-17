@@ -23,11 +23,14 @@ namespace Builder
         internal static OperationResult Build (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM)
             {
             var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
-            var vm = new HistoryEventVM(configurationVM)
-                {
-                Command = "bb b",
-                JobName = "Build",
-                };
+            var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
+            if (vm == null)
+                throw new InvalidOperationException("Could not create new history event");
+
+            vm.InitializeWith(configurationVM);
+            vm.Command = "bb b";
+            vm.JobName = "Build";
+
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
             return Execute(context, ProcessBuildOutput);
             }
@@ -77,11 +80,13 @@ namespace Builder
         internal static OperationResult Clean (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM)
             {
             var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
-            var vm = new HistoryEventVM(configurationVM)
-                {
-                Command = "bb b --tmr --noprompt",
-                JobName = "Rebuild"
-                };
+            var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
+            if (vm == null)
+                throw new InvalidOperationException("Could not create new history event");
+
+            vm.InitializeWith(configurationVM);
+            vm.Command = "bb b --tmr --noprompt";
+            vm.JobName = "Clean";
 
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
             return Execute(context, (c, o) => c.Log.WriteLine(o.Data));
@@ -90,11 +95,13 @@ namespace Builder
         internal static OperationResult Rebuild (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM)
             {
             var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
-            var vm = new HistoryEventVM(configurationVM)
-                {
-                Command = "bb b --tmrbuild --noprompt",
-                JobName = "Clean"
-                };
+            var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
+            if (vm == null)
+                throw new InvalidOperationException("Could not create new history event");
+
+            vm.InitializeWith(configurationVM);
+            vm.Command = "bb b --tmrbuild --noprompt";
+            vm.JobName = "Rebuild";
 
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
             return Execute(context, ProcessBuildOutput);
@@ -105,20 +112,17 @@ namespace Builder
             internal int Counter = 0;
             }
 
-        internal static OperationResult Bootstrap (CancellationToken cancellationToken, ProgressViewModel progress, string path, string stream)
+        internal static OperationResult Bootstrap (CancellationToken cancellationToken, ProgressViewModel progress, string path, string stream, HistoryVM history)
             {
             if (string.IsNullOrEmpty(path) || !Directory.Exists(path) || string.IsNullOrEmpty(stream))
                 return OperationResult.Failed;
 
             var shell = new CommandLineSandbox(path);
-            var vm = new HistoryEventVM()
-                {
-                Command = "bentleybootstrap.py " + stream,
-                JobName = "Bootstrap",
-
-                Stream = stream,
-                SrcDir = path
-                };
+            var vm = history.CreateHistoryEvent();
+            vm.Command = "bentleybootstrap.py " + stream;
+            vm.JobName = "Bootstrap";
+            vm.Stream = stream;
+            vm.SrcDir = path;
 
             var context = new JobContext<BootstrapInfo>(shell, cancellationToken, progress, vm);
             return Execute(context, ProcessBootstrapOutput);
@@ -171,7 +175,7 @@ namespace Builder
                     if (!HistoryVM.ID.HasValue)
                         throw new InvalidOperationException("No ID obtained for Job from DB.");
 
-                    string logPath = AppDataManager.GetAppDataPath(Path.Combine("logs", StringEncoder.ToString(HistoryVM.ID.Value, StringEncoder.BASE36CHARS) + ".txt"));
+                    string logPath = AppDataManager.GetLogFilePath(HistoryVM.ID.Value);
                     var dir = Path.GetDirectoryName(logPath);
                     if (!Directory.Exists(dir))
                         Directory.CreateDirectory(dir);

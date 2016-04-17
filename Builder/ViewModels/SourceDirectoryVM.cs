@@ -388,7 +388,7 @@ namespace Builder
             if (cancellationToken.IsCancellationRequested)
                 return OperationResult.Aborted;
 
-            return await Task.Run(() => JobImplementations.Bootstrap(cancellationToken, progress, path, Stream));
+            return await Task.Run(() => JobImplementations.Bootstrap(cancellationToken, progress, path, Stream, Parent?.HistoryVM));
             }
         #endregion
         }

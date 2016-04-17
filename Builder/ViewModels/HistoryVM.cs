@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Data.SQLite;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
 using log4net;
 using RSCoreLib.WPF;
 
@@ -16,6 +19,7 @@ namespace Builder
         public HistoryVM (MainVM parent)
             {
             Parent = parent;
+            System.Windows.Data.BindingOperations.EnableCollectionSynchronization(Entries, Entries);
             }
 
         public HistoryVM ()
@@ -26,6 +30,14 @@ namespace Builder
             Entries.Add(new HistoryEventVM() { ID = 42, JobName = "Bootstrap", Result = HistoryEventResult.Success });
             }
         
+        public HistoryEventVM CreateHistoryEvent()
+            {
+            var vm = new HistoryEventVM();
+            lock (Entries)
+                Entries.Insert(0, vm);
+
+            return vm;
+            }
         }
 
     public enum HistoryEventResult
@@ -36,13 +48,14 @@ namespace Builder
         Failed = 3
         }
 
-    public class HistoryEventVM
+    public class HistoryEventVM : ViewModelBase
         {
         public HistoryEventVM ()
             {
+            WireupCommands();
             }
 
-        public HistoryEventVM (ConfigurationVM configurationVM)
+        public void InitializeWith (ConfigurationVM configurationVM)
             {
             BuildStrategy = configurationVM.BuildStrategy;
             Stream = configurationVM?.Parent?.Stream;
@@ -52,21 +65,179 @@ namespace Builder
             Platform = "x64";
             }
 
-        public long? ID { get; set; } = null;
-        public string Command { get; set; }
-        public string JobName { get; set; }
-        public DateTime StartTime { get; set; }
-        public string BuildStrategy { get; set; }
-        public string Stream { get; set; }
-        public string SrcDir { get; set; }
-        public string OutDir { get; set; }
-        public bool Release { get; set; }
-        public string Platform { get; set; }
-        public HistoryEventResult Result { get; set; }
-        public double SecondsDuration { get; set; }
+        #region Properties
+        public long? _id = null;
+        public long? ID
+            {
+            get { return _id; }
+            set
+                {
+                if (_id == value)
+                    return;
+
+                _id = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private string _command;
+        public string Command
+            {
+            get { return _command; }
+            set
+                {
+                if (_command == value)
+                    return;
+
+                _command = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private string _jobName;
+        public string JobName
+            {
+            get { return _jobName; }
+            set
+                {
+                if (_jobName == value)
+                    return;
+
+                _jobName = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private DateTime _startTime;
+        public DateTime StartTime
+            {
+            get { return _startTime; }
+            set
+                {
+                if (_startTime == value)
+                    return;
+
+                _startTime = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private string _buildStrategy;
+        public string BuildStrategy
+            {
+            get { return _buildStrategy; }
+            set
+                {
+                if (_buildStrategy == value)
+                    return;
+
+                _buildStrategy = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private string _stream;
+        public string Stream
+            {
+            get { return _stream; }
+            set
+                {
+                if (_stream == value)
+                    return;
+
+                _stream = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private string _srcDir;
+        public string SrcDir
+            {
+            get { return _srcDir; }
+            set
+                {
+                if (_srcDir == value)
+                    return;
+
+                _srcDir = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private string _outDir;
+        public string OutDir
+            {
+            get { return _outDir; }
+            set
+                {
+                if (_outDir == value)
+                    return;
+
+                _outDir = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private bool _release;
+        public bool Release
+            {
+            get { return _release; }
+            set
+                {
+                if (_release == value)
+                    return;
+
+                _release = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private string _platform;
+        public string Platform
+            {
+            get { return _platform; }
+            set
+                {
+                if (_platform == value)
+                    return;
+
+                _platform = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private HistoryEventResult _result;
+        public HistoryEventResult Result
+            {
+            get { return _result; }
+            set
+                {
+                if (_result == value)
+                    return;
+
+                _result = value;
+                OnPropertyChanged();
+                }
+            }
+
+        private double _secondsDuration;
+        public double SecondsDuration
+            {
+            get { return _secondsDuration; }
+            set
+                {
+                if (_secondsDuration == value)
+                    return;
+
+                _secondsDuration = value;
+                OnPropertyChanged();
+                }
+            }
+        #endregion
 
         internal void Insert (SQLiteConnection connection)
             {
+            StartTime = DateTime.Now;
             using (var command = new SQLiteCommand(connection))
                 {
                 command.CommandText = $"INSERT INTO {AppDataManager.HISTORY_TABLENAME}"+
@@ -103,5 +274,28 @@ namespace Builder
                 command.ExecuteNonQuery();
                 }
             }
+
+        #region Commands
+        private void WireupCommands ()
+            {
+            NavigateToCommand.Handler = NavigateTo;
+            }
+
+        public SimpleCommand NavigateToCommand { get; } = new SimpleCommand();
+        private void NavigateTo (object obj)
+            {
+            Task.Run(() =>
+            {
+                if (!ID.HasValue)
+                    return;
+
+                var fileName = AppDataManager.GetLogFilePath(ID.Value);
+                if (!File.Exists(fileName))
+                    return;
+
+                Process.Start(fileName);
+            });
+            }
+        #endregion
         }
     }

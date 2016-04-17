@@ -7,8 +7,8 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         xmlns:rsc="clr-namespace:RSCoreLib.WPF;assembly=RSCoreLib"
-        Height="610" MinHeight="400"
-        Width="470" MinWidth="400"
+        Height="250" MinHeight="100"
+        Width="900" MinWidth="400"
         d:DataContext="{d:DesignInstance Type=local:HistoryVM, IsDesignTimeCreatable=True}"
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="2"
@@ -32,7 +32,17 @@
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>-->
     <Grid>
-        <DataGrid ItemsSource="{Binding Entries}" AutoGenerateColumns="False">
+        <DataGrid ItemsSource="{Binding Entries}" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
+            <DataGrid.Resources>
+                <InputBindingCollection x:Key="RowInputBindings" x:Shared="False">
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding NavigateToCommand, FallbackValue={StaticResource NullCommand}}" />
+                </InputBindingCollection>
+            </DataGrid.Resources>
+            <DataGrid.RowStyle>
+                <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource MetroDataGridRow}" >
+                    <Setter Property="rsc:Behaviors.InputBindings" Value="{StaticResource RowInputBindings}" />
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Width="Auto" Binding="{Binding ID}">
                     <DataGridTextColumn.ElementStyle>
@@ -42,9 +52,12 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Operation" Binding="{Binding Operation}" />
-                <DataGridTextColumn Header="Result" Binding="{Binding Result}" />
+                <DataGridTextColumn Header="Job" Binding="{Binding JobName}" Width="*" />
+                <DataGridTextColumn Header="Strategy" Binding="{Binding BuildStrategy}" Width="*" />
+                <DataGridTextColumn Header="Stream" Binding="{Binding Stream}" Width="*" />
+                <DataGridTextColumn Header="Result" Binding="{Binding Result}" Width="*" />
             </DataGrid.Columns>
+            
         </DataGrid>
     </Grid>
 </mah:MetroWindow>

@@ -19,12 +19,12 @@ namespace Builder
         public string RootHeader { get; } = "Environments on " + Environment.MachineName;
         public ObservableCollection<SourceDirectoryVM> SourceDirectories { get; } = new ObservableCollection<SourceDirectoryVM>();
         private static readonly ILog log = LogManager.GetLogger(typeof(MainVM));
-        private HistoryVM HistoryVM { get; }
+        public HistoryVM HistoryVM { get; }
 
         public MainVM (SettingsVM settings, ICollection<SourceDirectory> sourceDirectories)
             {
             Guard.NotNull(settings);
-            HistoryVM = new HistoryVM();
+            HistoryVM = new HistoryVM(this);
             SettingsVM = settings;
             WireupCommands();
 
