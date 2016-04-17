@@ -212,7 +212,7 @@ namespace Builder
             RebuildCommand.Handler = p => Parent.Parent.RunOperation(Rebuild, "Rebuild " + this.Alias, p);
             RebuildCommand.CanExecuteHandler = canExecuteHandler;
 
-            CleanCommand.Handler = p => Parent.Parent.RunOperation(Rebuild, "Clean", p);
+            CleanCommand.Handler = p => Parent.Parent.RunOperation(Clean, "Clean", p);
             CleanCommand.CanExecuteHandler = canExecuteHandler;
 
             DeleteCommand.Handler = Delete;

@@ -23,10 +23,10 @@ namespace Builder
         internal static OperationResult Build (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM)
             {
             var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
-            var vm = new HistoryEventVM()
+            var vm = new HistoryEventVM(configurationVM)
                 {
                 Command = "bb b",
-                JobName = "Build"
+                JobName = "Build",
                 };
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
             return Execute(context, ProcessBuildOutput);
@@ -77,20 +77,20 @@ namespace Builder
         internal static OperationResult Clean (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM)
             {
             var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
-            var vm = new HistoryEventVM()
+            var vm = new HistoryEventVM(configurationVM)
                 {
                 Command = "bb b --tmr --noprompt",
                 JobName = "Rebuild"
                 };
 
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
-            return Execute(context, (c,o) => c.Log.WriteLine(o));
+            return Execute(context, (c, o) => c.Log.WriteLine(o.Data));
             }
 
         internal static OperationResult Rebuild (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM)
             {
             var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
-            var vm = new HistoryEventVM()
+            var vm = new HistoryEventVM(configurationVM)
                 {
                 Command = "bb b --tmrbuild --noprompt",
                 JobName = "Clean"
@@ -104,7 +104,7 @@ namespace Builder
             {
             internal int Counter = 0;
             }
-        
+
         internal static OperationResult Bootstrap (CancellationToken cancellationToken, ProgressViewModel progress, string path, string stream)
             {
             if (string.IsNullOrEmpty(path) || !Directory.Exists(path) || string.IsNullOrEmpty(stream))
@@ -114,7 +114,10 @@ namespace Builder
             var vm = new HistoryEventVM()
                 {
                 Command = "bentleybootstrap.py " + stream,
-                JobName = "Bootstrap"
+                JobName = "Bootstrap",
+
+                Stream = stream,
+                SrcDir = path
                 };
 
             var context = new JobContext<BootstrapInfo>(shell, cancellationToken, progress, vm);
@@ -150,7 +153,7 @@ namespace Builder
             internal ProgressViewModel Progress { get; }
             internal CancellationToken CancellationToken { get; }
             internal T Information { get; }
-            internal HistoryEventVM  HistoryVM { get; }
+            internal HistoryEventVM HistoryVM { get; }
             internal CommandLineSandbox Shell { get; }
 
             internal JobContext (CommandLineSandbox shell, CancellationToken cancellationToken, ProgressViewModel progress, HistoryEventVM eventVM)
@@ -175,7 +178,7 @@ namespace Builder
 
                     Log = new StreamWriter(logPath, false);
                     }
-                catch(Exception e)
+                catch (Exception e)
                     {
                     log.ErrorFormat($"Exception while trying to setup context for command '{eventVM.Command}': {e.Message}");
                     DbConnection.Dispose();
@@ -206,7 +209,7 @@ namespace Builder
                     context.Shell.OutputHandler = o => lineProcessor(context, o);
                     var result = context.Shell.ExecuteCommand(context.HistoryVM.Command).Success ? OperationResult.Success : OperationResult.Failed;
                     stopwatch.Stop();
-                    context.HistoryVM.Update(context.DbConnection, result== OperationResult.Success ? HistoryEventResult.Success : HistoryEventResult.Failed, stopwatch.Elapsed.TotalSeconds);
+                    context.HistoryVM.Update(context.DbConnection, result == OperationResult.Success ? HistoryEventResult.Success : HistoryEventResult.Failed, stopwatch.Elapsed.TotalSeconds);
                     return result;
                     }
                 }

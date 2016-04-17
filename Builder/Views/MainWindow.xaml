@@ -61,15 +61,13 @@
                 <ContextMenu x:Key="RootContextMenu" Placement="Bottom">
                     <MenuItem Header="Add">
                         <MenuItem Header="New Source Directory..." Command="{Binding AddSourceDirectoryCommand}" />
-                        <MenuItem Header="Existing Item..." Command="{StaticResource NullCommand}" />
-                        <Separator />
                         <MenuItem Header="Scan Machine (Auto-Detect)" Command="{Binding ScanForEnvironmentsCommand}" >
                             <MenuItem.Icon>
                                 <Image Width="16" Height="16" Source="../Images/app16.png" />
                             </MenuItem.Icon>
                         </MenuItem>
                     </MenuItem>
-                    <MenuItem Header="Execute Long Running Test Method" Command="{Binding TestCommand}" />
+                    <!--<MenuItem Header="Execute Long Running Test Method" Command="{Binding TestCommand}" />-->
                     <Separator />
                     <MenuItem Header="Cancel" Command="{Binding CancelCommand}">
                         <MenuItem.Icon>
@@ -125,8 +123,8 @@
                             <Image Width="16" Height="16" Source="../Images/vs/buildOne16.png" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Rebuild" Command="{StaticResource NullCommand}"  />
-                    <MenuItem Header="Clean" Command="{StaticResource NullCommand}"  />
+                    <MenuItem Header="Rebuild" Command="{Binding RebuildCommand}"  />
+                    <MenuItem Header="Clean" Command="{Binding CleanCommand}"  />
                     <Separator />
                     <MenuItem Header="Explore Parts..." Command="{StaticResource NullCommand}"  />
                     <Separator />

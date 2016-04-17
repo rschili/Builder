@@ -282,10 +282,11 @@ namespace Builder
                 CommandManager.InvalidateRequerySuggested();
                 }
 
+            CancellationToken cancellationToken = _cancellationSource.Token;
             try
                 {
                 Progress.StatusMessage = prefix + STATUS_STARTED_SUFFIX;
-                var result = await operation(_cancellationSource.Token, Progress, parameter);
+                var result = await operation(cancellationToken, Progress, parameter);
 
                 if(result == OperationResult.Success)
                     {
@@ -314,8 +315,15 @@ namespace Builder
                 }
             catch (Exception e)
                 {
-                Progress.StatusMessage = prefix + STATUS_EXCEPTION_SUFFIX;
-                log.Error("Exception during operation", e);
+                if (cancellationToken.IsCancellationRequested)
+                    {
+                    Progress.StatusMessage = prefix + STATUS_CANCELLED_SUFFIX;
+                    }
+                else
+                    {
+                    Progress.StatusMessage = prefix + STATUS_EXCEPTION_SUFFIX;
+                    log.Error("Exception during operation", e);
+                    }
                 }
             finally
                 {
@@ -338,6 +346,7 @@ namespace Builder
                 if (source != null)
                     {
                     _cancellationSource = null;
+                    Progress.StatusMessage = "Cancelling...";
                     Task.Run(() => source.Cancel());
                     }
                 }

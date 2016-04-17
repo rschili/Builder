@@ -38,11 +38,26 @@ namespace Builder
 
     public class HistoryEventVM
         {
+        public HistoryEventVM ()
+            {
+            }
+
+        public HistoryEventVM (ConfigurationVM configurationVM)
+            {
+            BuildStrategy = configurationVM.BuildStrategy;
+            Stream = configurationVM?.Parent?.Stream;
+            SrcDir = configurationVM?.Parent?.SrcPath;
+            OutDir = configurationVM?.OutPath;
+            Release = configurationVM.Release;
+            Platform = "x64";
+            }
+
         public long? ID { get; set; } = null;
         public string Command { get; set; }
         public string JobName { get; set; }
         public DateTime StartTime { get; set; }
         public string BuildStrategy { get; set; }
+        public string Stream { get; set; }
         public string SrcDir { get; set; }
         public string OutDir { get; set; }
         public bool Release { get; set; }
@@ -54,9 +69,18 @@ namespace Builder
             {
             using (var command = new SQLiteCommand(connection))
                 {
-                command.CommandText = $"INSERT INTO {AppDataManager.HISTORY_TABLENAME}(command,jobName,startTime,resultCode) VALUES(@pCmd,@pJob, datetime('now'),0)";
+                command.CommandText = $"INSERT INTO {AppDataManager.HISTORY_TABLENAME}"+
+                    "(command,jobName,startTime,resultCode,buildStrategy,stream,sourceDir,outDir,release, platform) "+
+                    "VALUES(@pCmd,@pJob, datetime('now'),0,@buildStrat,@stream,@sourceDir,@outDir,@release,@platform)";
                 command.Parameters.AddWithValue("pCmd", Command);
                 command.Parameters.AddWithValue("pJob", JobName);
+
+                command.Parameters.AddWithValue("buildStrat", BuildStrategy);
+                command.Parameters.AddWithValue("stream", Stream);
+                command.Parameters.AddWithValue("sourceDir", SrcDir);
+                command.Parameters.AddWithValue("outDir", OutDir);
+                command.Parameters.AddWithValue("release", Release);
+                command.Parameters.AddWithValue("platform", Platform);
                 command.ExecuteNonQuery();
                 var id = connection.LastInsertRowId;
                 ID = id;
