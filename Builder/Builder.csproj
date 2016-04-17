@@ -99,12 +99,16 @@
     <Compile Include="Infrastructure\SourceDirectory.cs" />
     <Compile Include="Infrastructure\Settings.cs" />
     <Compile Include="ViewModels\HistoryVM.cs" />
+    <Compile Include="ViewModels\AboutVM.cs" />
     <Compile Include="ViewModels\PartVM.cs" />
     <Compile Include="ViewModels\ConfigurationVM.cs" />
     <Compile Include="ViewModels\SettingsVM.cs" />
     <Compile Include="ViewModels\SourceDirectoryVM.cs" />
     <Compile Include="Views\ConfigurationPropertiesDialog.xaml.cs">
       <DependentUpon>ConfigurationPropertiesDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AboutWindow.xaml.cs">
+      <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\HistoryWindow.xaml.cs">
       <DependentUpon>HistoryWindow.xaml</DependentUpon>
@@ -116,6 +120,10 @@
       <DependentUpon>SettingsDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\MainVM.cs" />
+    <Page Include="Views\AboutWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

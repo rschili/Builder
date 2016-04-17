@@ -51,6 +51,7 @@ namespace Builder
             {
             ShowSettingsCommand.Handler = ShowSettings;
             ShowHistoryCommand.Handler = ShowHistory;
+            ShowAboutCommand.Handler = ShowAbout;
             ShowUICommand.Handler = ShowMainUI;
             HideUICommand.Handler = HideMainUI;
             ExitCommand.Handler = Exit;
@@ -115,6 +116,18 @@ namespace Builder
                 window.Show();
                 _historyWindow = window;
                 }
+            }
+
+        public SimpleCommand ShowAboutCommand { get; } = new SimpleCommand();
+        private void ShowAbout (object obj)
+            {
+            AboutWindow dialog = new AboutWindow();
+            dialog.DataContext = new AboutVM();
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow != null)
+                dialog.Owner = mainWindow;
+
+            dialog.ShowDialog();
             }
         #endregion
 

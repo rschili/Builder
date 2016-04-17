@@ -54,12 +54,10 @@ Version History
 
 **Short term**
 
--   **History** Window displaying Jobs of current session, jump to logfile by double-clicking a row
--   **About-Window** that displays available updates and installed software
+-   Part Browser, allow pinning specific parts below a configuration node in the tree so only that part may be build
 
 **Long term**
 
--   Part Browser, allow pinning specific parts below a configuration node in the tree so only that part may be build
 -   Extract **Warnings and Errors** for each build, write to DB
 -   Visual Studio-like **Error List** Window
 -   Visual Studio-like **Output** Window
@@ -68,6 +66,8 @@ Version History
 
 **1.0 Initial Release Latest additions**
 
+-   **History** Window displaying Jobs of current session, jump to logfile by double-clicking a row
+-   **About-Window** that displays available updates and installed software
 -   resolve automatic TCC path on demand instead of scanning on every launch
 -   call python in unbuffered mode (sometimes all outputs were sent at the end of the build)
 

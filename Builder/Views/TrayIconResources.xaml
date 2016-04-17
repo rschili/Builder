@@ -21,6 +21,7 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator />
+                <MenuItem Header="About" Command="{Binding ShowAboutCommand, FallbackValue={StaticResource NullCommand}}" />
                 <MenuItem Header="Shutdown" Command="{Binding ExitCommand, FallbackValue={StaticResource NullCommand}}" />
             </ContextMenu>
         </tb:TaskbarIcon.ContextMenu>

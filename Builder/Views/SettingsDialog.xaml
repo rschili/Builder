@@ -24,7 +24,7 @@
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <WrapPanel DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="0,10,15,15">
-            <Button IsDefault="True" Name="btnDialogOk" Click="Ok_Click" MinWidth="60" Margin="0,0,10,0">_Ok</Button>
+            <Button IsDefault="True" Name="btnDialogOk" Click="Ok_Click" MinWidth="60" Margin="0,0,10,0">_OK</Button>
             <Button IsCancel="True" MinWidth="60">_Cancel</Button>
         </WrapPanel>
         <ScrollViewer VerticalScrollBarVisibility="Auto">

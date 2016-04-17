@@ -21,8 +21,9 @@
     </Window.TaskbarItemInfo>
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands ShowSeparators="False">
-            <Button Command="{Binding ShowHistoryCommand}" Content="🕓" ToolTip="History" />
-            <Button Command="{Binding ShowSettingsCommand}" Content="⚙" ToolTip="Global Settings" />
+            <Button Command="{Binding ShowHistoryCommand}" Content="History" ToolTip="History" />
+            <Button Command="{Binding ShowSettingsCommand}" Content="Settings" ToolTip="Global Settings" />
+            <Button Command="{Binding ShowAboutCommand}" Content="About" ToolTip="About" />
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
     <Window.InputBindings>
