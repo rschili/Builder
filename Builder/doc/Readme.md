@@ -52,20 +52,22 @@ Version History
 
 ### Upcoming Features
 
--   Bootstrap does not return anything until finished (try python -u ?)
--   Wire-up **Rebuild and Clean** commands
--   Database Logging for builds
--   **History** Window for recent operations
+**Short term**
+
+-   **History** Window displaying Jobs of current session, jump to logfile by double-clicking a row
 -   **About-Window** that displays available updates and installed software
+
+**Long term**
+
+-   Part Browser, allow pinning specific parts below a configuration node in the tree so only that part may be build
 -   Extract **Warnings and Errors** for each build, write to DB
--   Display Warnings/Errors for selected build in history pane
--   [Hide WPF Grid Columns](http://www.codeproject.com/Articles/437237/WPF-Grid-Column-and-Row-Hiding)
--   [WPF Data Virtualization](http://blogs.microsoft.co.il/tomershamam/2009/09/07/ui-virtualization-vs-data-virtualization-part-1/)
--   
+-   Visual Studio-like **Error List** Window
+-   Visual Studio-like **Output** Window
 
 ### Changelog
 
 **1.0 Initial Release Latest additions**
 
 -   resolve automatic TCC path on demand instead of scanning on every launch
+-   call python in unbuffered mode (sometimes all outputs were sent at the end of the build)
 

@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Data.SQLite;
 using log4net;
 using RSCoreLib.WPF;
 
@@ -18,18 +20,64 @@ namespace Builder
 
         public HistoryVM ()
             {
-            Entries.Add(new HistoryEventVM() { ID = 1, Operation="Rebuild", Result = "Failed" });
-            Entries.Add(new HistoryEventVM() { ID = 2, Operation = "Rebuild", Result = "Success" });
-            Entries.Add(new HistoryEventVM() { ID = 3, Operation = "Build", Result = "Unknown" });
-            Entries.Add(new HistoryEventVM() { ID = 42, Operation = "Bootstrap", Result = "Failed" });
+            Entries.Add(new HistoryEventVM() { ID = 1, JobName = "Rebuild", Result = HistoryEventResult.Failed });
+            Entries.Add(new HistoryEventVM() { ID = 2, JobName = "Rebuild", Result = HistoryEventResult.Failed });
+            Entries.Add(new HistoryEventVM() { ID = 3, JobName = "Build", Result = HistoryEventResult.Failed });
+            Entries.Add(new HistoryEventVM() { ID = 42, JobName = "Bootstrap", Result = HistoryEventResult.Success });
             }
         
         }
 
+    public enum HistoryEventResult
+        {
+        Unknown = 0,
+        Success = 1,
+        Cancelled = 2,
+        Failed = 3
+        }
+
     public class HistoryEventVM
         {
-        public int ID { get; set; }
-        public string Operation { get; set; }
-        public string Result { get; set; }
+        public long? ID { get; set; } = null;
+        public string Command { get; set; }
+        public string JobName { get; set; }
+        public DateTime StartTime { get; set; }
+        public string BuildStrategy { get; set; }
+        public string SrcDir { get; set; }
+        public string OutDir { get; set; }
+        public bool Release { get; set; }
+        public string Platform { get; set; }
+        public HistoryEventResult Result { get; set; }
+        public double SecondsDuration { get; set; }
+
+        internal void Insert (SQLiteConnection connection)
+            {
+            using (var command = new SQLiteCommand(connection))
+                {
+                command.CommandText = $"INSERT INTO {AppDataManager.HISTORY_TABLENAME}(command,jobName,startTime,resultCode) VALUES(@pCmd,@pJob, datetime('now'),0)";
+                command.Parameters.AddWithValue("pCmd", Command);
+                command.Parameters.AddWithValue("pJob", JobName);
+                command.ExecuteNonQuery();
+                var id = connection.LastInsertRowId;
+                ID = id;
+                }
+            }
+
+        internal void Update (SQLiteConnection connection, HistoryEventResult result, double secondsDuration)
+            {
+            if (!ID.HasValue)
+                throw new InvalidOperationException("This VM does not have an ID assigned yet.");
+
+            SecondsDuration = secondsDuration;
+            Result = result;
+            using (var command = new SQLiteCommand(connection))
+                {
+                command.CommandText = $"UPDATE {AppDataManager.HISTORY_TABLENAME} SET secondsDuration=@pSec, resultCode=@pResult WHERE id=@pId";
+                command.Parameters.AddWithValue("pSec", secondsDuration);
+                command.Parameters.AddWithValue("pResult", (int)Result);
+                command.Parameters.AddWithValue("pId", ID.Value);
+                command.ExecuteNonQuery();
+                }
+            }
         }
     }

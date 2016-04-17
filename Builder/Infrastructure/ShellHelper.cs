@@ -107,7 +107,7 @@ namespace Builder
 
             if (!Directory.Exists(src))
                 {
-                throw new InvalidOperationException(string.Format("Cannot setup env because directory {0} does not exist.", src));
+                throw new InvalidOperationException($"Cannot setup env because directory {src} does not exist.");
                 }
 
             try

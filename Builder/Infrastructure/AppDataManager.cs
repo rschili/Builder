@@ -104,6 +104,7 @@ namespace Builder
         public const string HISTORY_TABLENAME = "HISTORY";
         private const string HISTORY_SCHEMA = "CREATE TABLE " + HISTORY_TABLENAME + "(id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "command TEXT," +
+            "jobName TEXT," +
             "startTime DATETIME,"+
             "buildStrategy TEXT," +
             "stream TEXT," +
@@ -112,7 +113,7 @@ namespace Builder
             "release INTEGER," +
             "platform TEXT," +
             "resultCode INTEGER," +
-            "secondsDuration INTEGER" +
+            "secondsDuration REAL" +
             ")";
 
         public const string HISTORY_MESSAGE_TABLENAME = "HISTORY_MESSAGE";

@@ -271,7 +271,7 @@ namespace Builder
         private void NavigateTo (object obj)
             {
             if (!ShellHelper.OpenDirectoryInExplorer(SrcPath))
-                Parent.Progress.StatusMessage = string.Format("'{0}' does not exist.", SrcPath);
+                Parent.Progress.StatusMessage = $"'{SrcPath}' does not exist.";
             }
 
         public SimpleCommand DeleteCommand { get; } = new SimpleCommand();
@@ -282,7 +282,7 @@ namespace Builder
 
             var collection = Parent.SourceDirectories;
 
-            if (MessageBox.Show(string.Format("Environment '{0}' will be removed. It will remain on disk.", Alias), "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning)
+            if (MessageBox.Show($"Environment '{Alias}' will be removed. It will remain on disk.", "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning)
                 != MessageBoxResult.OK)
                 return;
 
@@ -350,7 +350,7 @@ namespace Builder
             var path = Path.GetFullPath(SrcPath);
             if (!Directory.Exists(path))
                 {
-                if (MessageBox.Show(string.Format("This will bootstrap  stream '{0}' into directory '{1}'.", Stream, path), "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Information)
+                if (MessageBox.Show($"This will bootstrap  stream '{Stream}' into directory '{path}'.", "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Information)
                 != MessageBoxResult.OK)
                     return OperationResult.Aborted;
 
@@ -360,13 +360,13 @@ namespace Builder
                     }
                 catch (Exception e)
                     {
-                    MessageBox.Show(string.Format("Could not create '{0}'. {1}", path, e.Message, "Failed", MessageBoxButton.OK, MessageBoxImage.None));
+                    MessageBox.Show($"Could not create '{path}'. {e.Message}", "Failed", MessageBoxButton.OK, MessageBoxImage.None);
                     return OperationResult.Failed;
                     }
                 }
             else if (Directory.EnumerateFileSystemEntries(path).Any())
                 {
-                if (MessageBox.Show(string.Format("Directory '{0}' is not empty. All contents will be deleted before bootstrap. Please confirm.", path), "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning)
+                if (MessageBox.Show($"Directory '{path}' is not empty. All contents will be deleted before bootstrap. Please confirm.", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning)
                     != MessageBoxResult.OK)
                     return OperationResult.Aborted;
 
@@ -380,7 +380,7 @@ namespace Builder
                     }
                 catch(Exception e)
                     {
-                    MessageBox.Show(string.Format("Could not clear '{0}'. {1}", path, e.Message, "Failed", MessageBoxButton.OK, MessageBoxImage.None));
+                    MessageBox.Show($"Could not clear '{path}'. {e.Message}", "Failed", MessageBoxButton.OK, MessageBoxImage.None);
                     return OperationResult.Failed;
                     }
                 }

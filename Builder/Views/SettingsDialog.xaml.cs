@@ -37,7 +37,7 @@ namespace Builder
             var directory = AppDataManager.GetAppDataPath();
             if(!Directory.Exists(directory))
                 {
-                MessageBox.Show(this, string.Format(CultureInfo.CurrentCulture, "The application data directory {0} does not exist. It has probably not been created, yet."));
+                MessageBox.Show(this, $"The application data directory '{directory}' does not exist. It has probably not been created, yet.");
                 return;
                 }
 

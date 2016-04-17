@@ -23,13 +23,7 @@ namespace Builder
             {
             Parent = parent;
             Model = model;
-            ShowPropertiesCommand.Handler = ShowProperties;
-            BuildCommand.Handler = p => Parent.Parent.RunOperation(Build, "Build", p);
-            DeleteCommand.Handler = Delete;
-            OpenShellCommand.Handler = OpenShell;
-            MoveUpCommand.Handler = MoveUp;
-            MoveDownCommand.Handler = MoveDown;
-            NavigateToCommand.Handler = NavigateTo;
+            WireupCommands();
 
             if (model.PinnedParts != null)
                 {
@@ -206,6 +200,28 @@ namespace Builder
             return new ConfigurationVM(Parent, Model.Copy());
             }
 
+        private void WireupCommands ()
+            {
+            Func<object, bool?> canExecuteHandler = (_) => !Parent?.Parent?.OperationIsRunning;
+
+            ShowPropertiesCommand.Handler = ShowProperties;
+
+            BuildCommand.Handler = p => Parent.Parent.RunOperation(Build, "Build", p);
+            BuildCommand.CanExecuteHandler = canExecuteHandler;
+
+            RebuildCommand.Handler = p => Parent.Parent.RunOperation(Rebuild, "Rebuild " + this.Alias, p);
+            RebuildCommand.CanExecuteHandler = canExecuteHandler;
+
+            CleanCommand.Handler = p => Parent.Parent.RunOperation(Rebuild, "Clean", p);
+            CleanCommand.CanExecuteHandler = canExecuteHandler;
+
+            DeleteCommand.Handler = Delete;
+            OpenShellCommand.Handler = OpenShell;
+            MoveUpCommand.Handler = MoveUp;
+            MoveDownCommand.Handler = MoveDown;
+            NavigateToCommand.Handler = NavigateTo;
+            }
+
         public SimpleCommand ShowPropertiesCommand { get; } = new SimpleCommand(true);
 
         private void ShowProperties (object obj)
@@ -251,7 +267,7 @@ namespace Builder
 
             if (obj == null) //dummy parameter is used to indicate "delete without asking"
                 {
-                if (MessageBox.Show(string.Format("Environment '{0}' will be removed. It will remain on disk.", Alias), "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning)
+                if (MessageBox.Show($"Environment '{Alias}' will be removed. It will remain on disk.", "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning)
                     != MessageBoxResult.OK)
                     return;
                 }
@@ -269,7 +285,7 @@ namespace Builder
         private void NavigateTo (object obj)
             {
             if (!ShellHelper.OpenDirectoryInExplorer(OutPath))
-                Parent.Parent.Progress.StatusMessage = string.Format("'{0}' does not exist.", OutPath);
+                Parent.Parent.Progress.StatusMessage = $"'{OutPath}' does not exist.";
             }
 
         public SimpleCommand BuildCommand { get; } = new SimpleCommand(true);
@@ -280,7 +296,29 @@ namespace Builder
                 return OperationResult.Failed;
 
             progress.IsIndeterminate = true;
-            return await Task.Run(() => JobImplementations.Build(cancellationToken, progress, Parent.SrcPath, OutPath, BuildStrategy));
+            return await Task.Run(() => JobImplementations.Build(cancellationToken, progress, this));
+            }
+
+        public SimpleCommand RebuildCommand { get; } = new SimpleCommand(true);
+        private async Task<OperationResult> Rebuild (CancellationToken cancellationToken, ProgressViewModel progress, object parameter)
+            {
+            var parent = Parent;
+            if (parent == null)
+                return OperationResult.Failed;
+
+            progress.IsIndeterminate = true;
+            return await Task.Run(() => JobImplementations.Rebuild(cancellationToken, progress, this));
+            }
+
+        public SimpleCommand CleanCommand { get; } = new SimpleCommand(true);
+        private async Task<OperationResult> Clean (CancellationToken cancellationToken, ProgressViewModel progress, object parameter)
+            {
+            var parent = Parent;
+            if (parent == null)
+                return OperationResult.Failed;
+
+            progress.IsIndeterminate = true;
+            return await Task.Run(() => JobImplementations.Clean(cancellationToken, progress, this));
             }
 
         public SimpleCommand OpenShellCommand { get; } = new SimpleCommand(true);
