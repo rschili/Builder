@@ -98,12 +98,16 @@
     <Compile Include="Infrastructure\ShellHelper.cs" />
     <Compile Include="Infrastructure\SourceDirectory.cs" />
     <Compile Include="Infrastructure\Settings.cs" />
+    <Compile Include="ViewModels\PartExplorerVM.cs" />
     <Compile Include="ViewModels\HistoryVM.cs" />
     <Compile Include="ViewModels\AboutVM.cs" />
     <Compile Include="ViewModels\PartVM.cs" />
     <Compile Include="ViewModels\ConfigurationVM.cs" />
     <Compile Include="ViewModels\SettingsVM.cs" />
     <Compile Include="ViewModels\SourceDirectoryVM.cs" />
+    <Compile Include="Views\PartExplorer.xaml.cs">
+      <DependentUpon>PartExplorer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ConfigurationPropertiesDialog.xaml.cs">
       <DependentUpon>ConfigurationPropertiesDialog.xaml</DependentUpon>
     </Compile>
@@ -120,6 +124,10 @@
       <DependentUpon>SettingsDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\MainVM.cs" />
+    <Page Include="Views\PartExplorer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\AboutWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

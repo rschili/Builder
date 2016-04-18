@@ -127,7 +127,7 @@
                     <MenuItem Header="Rebuild" Command="{Binding RebuildCommand}"  />
                     <MenuItem Header="Clean" Command="{Binding CleanCommand}"  />
                     <Separator />
-                    <MenuItem Header="Explore Parts..." Command="{StaticResource NullCommand}"  />
+                    <MenuItem Header="Explore Parts..." Command="{Binding ExplorePartsCommand}"  />
                     <Separator />
                     <MenuItem Header="Move Up" Command="{Binding MoveUpCommand}" InputGestureText="Alt+Up" />
                     <MenuItem Header="Move Down" Command="{Binding MoveDownCommand}" InputGestureText="Alt+Down" />

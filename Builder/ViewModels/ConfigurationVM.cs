@@ -220,6 +220,7 @@ namespace Builder
             MoveUpCommand.Handler = MoveUp;
             MoveDownCommand.Handler = MoveDown;
             NavigateToCommand.Handler = NavigateTo;
+            ExplorePartsCommand.Handler = ExploreParts;
             }
 
         public SimpleCommand ShowPropertiesCommand { get; } = new SimpleCommand(true);
@@ -366,6 +367,21 @@ namespace Builder
                 IsSelected = true;
                 Parent.Parent.EnvironmentIsDirty();
                 }
+            }
+
+        public SimpleCommand ExplorePartsCommand { get; } = new SimpleCommand();
+        private void ExploreParts (object parameter)
+            {
+            PartExplorer dialog = new PartExplorer();
+            dialog.DataContext = new PartExplorerVM(this);
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow != null)
+                {
+                dialog.Owner = mainWindow;
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                }
+
+            dialog.ShowDialog();
             }
         }
     }

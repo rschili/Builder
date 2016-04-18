@@ -16,7 +16,7 @@
             </MenuItem.Icon>
         </MenuItem>
         <Separator />
-        <MenuItem Header="Shutdown" Command="{Binding ExitCommand, FallbackValue={StaticResource NullCommand}}" />
+        <MenuItem Header="Exit" Command="{Binding ExitCommand, FallbackValue={StaticResource NullCommand}}" />
     </ContextMenu>
     <tb:TaskbarIcon x:Key="NotifyIcon"
             IconSource="../Images/app.ico"
