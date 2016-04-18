@@ -20,7 +20,7 @@
         <TaskbarItemInfo ProgressState="{Binding Progress.ProgressState}" ProgressValue="{Binding Progress.FractionValue}" />
     </Window.TaskbarItemInfo>
     <mah:MetroWindow.RightWindowCommands>
-        <mah:WindowCommands ShowSeparators="False">
+        <mah:WindowCommands ShowLastSeparator="False">
             <Button Command="{Binding ShowHistoryCommand}" Content="History" ToolTip="History" />
             <Button Command="{Binding ShowSettingsCommand}" Content="Settings" ToolTip="Global Settings" />
             <Button Command="{Binding ShowAboutCommand}" Content="About" ToolTip="About" />
@@ -70,7 +70,7 @@
                     </MenuItem>
                     <!--<MenuItem Header="Execute Long Running Test Method" Command="{Binding TestCommand}" />-->
                     <Separator />
-                    <MenuItem Header="Cancel" Command="{Binding CancelCommand}">
+                    <MenuItem Header="Cancel current operation" Command="{Binding CancelCommand}">
                         <MenuItem.Icon>
                             <Image Width="16" Height="16" Source="../Images/vs/cancel16.png" />
                         </MenuItem.Icon>

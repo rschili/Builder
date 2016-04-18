@@ -12,6 +12,7 @@ You will not find a lot of comments or tests for this thing, but I try to keep t
 **This Application requires .NET Framework 4.6.1 to run.** You can download it [here](https://www.microsoft.com/en-us/download/details.aspx?id=49981) for Windows 7 and later.
 
 ![Picture of Main Window](Builder/doc/main.png)
+[![Demo Video](https://j.gifs.com/OYXAwp.gif)](https://youtu.be/bxuDoglKJyU)
 
 Dependencies
 ------------

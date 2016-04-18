@@ -80,8 +80,12 @@ namespace Builder
 
             SettingsDialog dialog = new SettingsDialog();
             dialog.DataContext = SettingsVM.Copy();
-            dialog.Owner = Application.Current.MainWindow;
-            dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow != null)
+                {
+                dialog.Owner = mainWindow;
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                }
             if (dialog.ShowDialog() == true)
                 {
                 var result = (SettingsVM)dialog.DataContext;
@@ -112,7 +116,12 @@ namespace Builder
 
                 window = new HistoryWindow();
                 window.DataContext = HistoryVM;
-                window.Owner = Application.Current.MainWindow;
+                var mainWindow = Application.Current.MainWindow;
+                if (mainWindow != null)
+                    {
+                    window.Owner = mainWindow;
+                    window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    }
                 window.Show();
                 _historyWindow = window;
                 }
@@ -125,7 +134,10 @@ namespace Builder
             dialog.DataContext = new AboutVM();
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null)
+                {
                 dialog.Owner = mainWindow;
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                }
 
             dialog.ShowDialog();
             }
