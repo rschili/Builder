@@ -51,7 +51,17 @@ namespace Builder
                 {
                 var r = ReadStrategies(strategiesDir, strats);
                 ReadImportedStrategies(strategiesDir, r, 0);
+                var compiledStrategy = CompileStrategy(r.Values.Where(s => s != null).OrderBy(s => s.Priority).ToList());
                 log.Info($"Read an overall of {r.Count} Build Strategies.");
+                log.Info($"Compiled Strategy contains {compiledStrategy.PartStrategies.Count} PartStrategies, {compiledStrategy.LocalRepositories.Count} LocalRepositories.");
+                var dt = compiledStrategy.DefaultTarget;
+                if (dt == null)
+                    {
+                    log.Info("Compiled Strategy has no default target.");
+                    return;
+                    }
+
+                log.Info($"Default Target '{dt.PartName}' in File '{dt.PartFile}' Repository '{dt.Repository}'");
                 return;
                 }
             catch (Exception e)
@@ -66,12 +76,12 @@ namespace Builder
             var result = new Dictionary<string, BuildStrategy>(StringComparer.OrdinalIgnoreCase);
             foreach(var s in strats)
                 {
-                result.Add(s, ReadBuildStrategy(strategiesDirectory, s));
+                result.Add(s, ReadBuildStrategy(strategiesDirectory, s, 0));
                 }
             return result;
             }
 
-        private BuildStrategy ReadBuildStrategy (string strategiesDirectory, string strategyName)
+        private BuildStrategy ReadBuildStrategy (string strategiesDirectory, string strategyName, int priority)
             {
             string fileName = FindStrategy(strategiesDirectory, strategyName);
             if (string.IsNullOrEmpty(fileName))
@@ -83,6 +93,8 @@ namespace Builder
                 return null;
 
             var result = new BuildStrategy();
+            result.Priority = priority;
+            result.Name = strategyName;
             foreach(var node in strategyNode.Elements())
                 {
                 if (node.NodeType != System.Xml.XmlNodeType.Element)
@@ -129,6 +141,38 @@ namespace Builder
                             });
                         break;
 
+                    case "LocalRepository":
+                        var lr = new LocalRepository()
+                            {
+                            Name = node.Attribute("Name")?.Value,
+                            Type = node.Attribute("Type")?.Value
+                            };
+
+                        var dir = node.Attribute("Directory")?.Value; 
+                        //HACK: instead of resolving the env var, just drop it, as directory seems to start with it.
+                        if(!string.IsNullOrEmpty(dir) && dir.StartsWith("${SrcRoot}", StringComparison.OrdinalIgnoreCase))
+                        {
+                            dir = dir.Substring(10);
+                        }
+
+                        lr.Directory = dir;
+                        result.LocalRepositories.Add(lr);
+                        break;
+
+                    //simply ignore these, they are not relevant
+                    case "FirebugJob":
+                    case "RepositoryLists":
+                    case "BuildTranskitOptions":
+                    case "DefaultProvenance":
+                    case "RemoteRepositoryList":
+                    case "RepositoryTag":
+                    case "LastKnownGoodSource":
+                    case "LastKnownGoodServer":
+                    case "SdkSource":
+                    case "TransKitDirectory":
+                    case "ToolsetPart":
+                        break;
+
                     default:
                         log.InfoFormat("Unknown Element encountered: {0} in file {1}", node.Name, fileName);
                         break;
@@ -151,10 +195,21 @@ namespace Builder
 
         internal class BuildStrategy
             {
+            public string Name { get; set; }
             public IList<string> ImportStrategies { get; } = new List<string>();
             public DefaultPartOptions DefaultPartOptions { get; set; }
             public DefaultTarget DefaultTarget { get; set; }
             public IList<PartStrategy> PartStrategies { get; } = new List<PartStrategy>();
+            public IList<LocalRepository> LocalRepositories { get; } = new List<LocalRepository>();
+            public int Priority { get; set; }
+            }
+
+        internal class CompiledBuildStrategy
+            {
+            public DefaultPartOptions DefaultPartOptions { get; set; }
+            public DefaultTarget DefaultTarget { get; set; }
+            public List<PartStrategy> PartStrategies { get; } = new List<PartStrategy>();
+            public List<LocalRepository> LocalRepositories { get; } = new List<LocalRepository>();
             }
 
         internal class DefaultPartOptions
@@ -169,6 +224,13 @@ namespace Builder
             public string PartFile { get; set; }
             public string PartName { get; set; }
             public string Platform { get; set; }
+            }
+
+        internal class LocalRepository
+            {
+            public string Name { get; set; }
+            public string Type { get; set; }
+            public string Directory { get; set; }
             }
 
         internal class PartStrategy
@@ -191,12 +253,26 @@ namespace Builder
             if (missingStrats.Count <= 0)
                 return;
 
+            depth++;
             foreach (var s in missingStrats)
                 {
-                strats.Add(s, ReadBuildStrategy(strategiesDir, s));
+                strats.Add(s, ReadBuildStrategy(strategiesDir, s, depth));
                 }
 
-            ReadImportedStrategies(strategiesDir, strats, depth + 1);
+            ReadImportedStrategies(strategiesDir, strats, depth);
+            }
+
+        private CompiledBuildStrategy CompileStrategy (List<BuildStrategy> list)
+            {
+            var result = new CompiledBuildStrategy();
+            result.DefaultPartOptions = list.Select(s => s.DefaultPartOptions).FirstOrDefault(dpo => dpo != null);
+            result.DefaultTarget = list.Select(s => s.DefaultTarget).FirstOrDefault(dt => dt != null);
+            var partStrategies = list.SelectMany(s => s.PartStrategies);
+            result.PartStrategies.AddRange(partStrategies);
+
+            var localRepositories = list.SelectMany(s => s.LocalRepositories).Where(l => !string.IsNullOrEmpty(l.Directory));
+            result.LocalRepositories.AddRange(localRepositories);
+            return result;
             }
         }
     }
