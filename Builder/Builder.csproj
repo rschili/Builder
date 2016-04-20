@@ -92,6 +92,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Infrastructure\AppDataManager.cs" />
+    <Compile Include="Infrastructure\PartFileScanner.cs" />
+    <Compile Include="Infrastructure\BuildStrategyScanner.cs" />
     <Compile Include="Infrastructure\SourceDirectoryScanner.cs" />
     <Compile Include="Infrastructure\JobImplementations.cs" />
     <Compile Include="Infrastructure\Themes.cs" />

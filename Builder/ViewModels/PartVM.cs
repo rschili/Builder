@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using log4net;
 using RSCoreLib.WPF;
+using static Builder.PartExplorerVM;
 
 namespace Builder
     {
@@ -10,13 +11,13 @@ namespace Builder
         {
         private static readonly ILog log = LogManager.GetLogger(typeof(PartVM));
         private readonly ConfigurationVM Parent;
-        public Part Model { get; private set; }
+        internal PinnedPart Model { get; private set; }
 
-        public PartVM (ConfigurationVM parent) : this(parent, new Part())
+        public PartVM (ConfigurationVM parent) : this(parent, new PinnedPart())
             {
             }
 
-        public PartVM (ConfigurationVM parent, Part model)
+        internal PartVM (ConfigurationVM parent, PinnedPart model)
             {
             Parent = parent;
             Model = model;
@@ -42,7 +43,7 @@ namespace Builder
 
         public PartVM Copy ()
             {
-            return new PartVM(Parent, Model.Copy());
+            return null;
             }
 
         public SimpleCommand UnpinCommand { get; } = new SimpleCommand(true);

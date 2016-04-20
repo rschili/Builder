@@ -58,7 +58,7 @@ namespace Builder
         public string ShellCommands { get; set; }
 
         [JsonProperty("pinned_parts", NullValueHandling = NullValueHandling.Ignore)]
-        public IList<Part> PinnedParts { get; set; } = new List<Part>();
+        public IList<PinnedPart> PinnedParts { get; set; } = new List<PinnedPart>();
 
         public Configuration Copy ()
             {
@@ -69,20 +69,20 @@ namespace Builder
                 BuildStrategy = BuildStrategy,
                 Release = Release,
                 ShellCommands = ShellCommands,
-                PinnedParts = new List<Part>(PinnedParts.Select(c => c.Copy()))
+                PinnedParts = new List<PinnedPart>(PinnedParts.Select(c => c.Copy()))
                 };
             }
         }
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class Part
+    public class PinnedPart
         {
         [JsonProperty("name")]
         public string Name { get; set; }
 
-        public Part Copy ()
+        public PinnedPart Copy ()
             {
-            return new Part()
+            return new PinnedPart()
                 {
                 Name = Name
                 };

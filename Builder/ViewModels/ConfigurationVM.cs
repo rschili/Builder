@@ -29,7 +29,7 @@ namespace Builder
                 {
                 foreach (var part in model.PinnedParts)
                     {
-                    PinnedParts.Add(new PartVM(this, part));
+                    PinnedParts.Add(new PartVM(this, null));
                     }
                 }
 
