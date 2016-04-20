@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using log4net;
+using RSCoreLib;
 using RSCoreLib.WPF;
 
 namespace Builder
@@ -237,7 +238,6 @@ namespace Builder
             ConfigurationPropertiesDialog dialog = new ConfigurationPropertiesDialog();
             dialog.DataContext = Copy();
             dialog.Owner = mainWindow;
-            dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             using (Parent.Parent.Progress.ReportIndeterminate())
                 {
                 if (dialog.ShowDialog() == true)
@@ -373,15 +373,16 @@ namespace Builder
         private void ExploreParts (object parameter)
             {
             PartExplorer dialog = new PartExplorer();
-            dialog.DataContext = new PartExplorerVM(this);
+            var vm = new PartExplorerVM(this);
+            dialog.DataContext = vm;
+            Task.Run((Action)vm.Initialize).SwallowAndLogExceptions();
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null)
                 {
                 dialog.Owner = mainWindow;
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 }
 
-            dialog.ShowDialog();
+            dialog.Show();
             }
         }
     }

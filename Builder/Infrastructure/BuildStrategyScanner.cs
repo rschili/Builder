@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using log4net;
 using Newtonsoft.Json.Linq;
+using RSCoreLib;
 using RSCoreLib.WPF;
 
 namespace Builder
@@ -60,36 +61,28 @@ namespace Builder
         public string BuildFromSource { get; set; }
         }
 
-    public class BuildStrategyScanner : ViewModelBase
+    public class BuildStrategyScanner
         {
         private static readonly ILog log = LogManager.GetLogger(typeof(BuildStrategyScanner));
 
         public static CompiledBuildStrategy LoadCompiledStrategy (string srcPath, string buildStrategies)
             {
             if (string.IsNullOrEmpty(srcPath))
-                return null;
+                throw new UserfriendlyException("Source Path must be set");
 
             if (string.IsNullOrEmpty(buildStrategies))
-                return null;
+                throw new UserfriendlyException("Build Strategy must be set");
 
             string strategiesDir = Path.Combine(srcPath, "BuildStrategies");
             if (!Directory.Exists(strategiesDir))
-                return null;
+                throw new UserfriendlyException($"Directory {strategiesDir} does not exist.");
 
             string[] strats = buildStrategies.Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
 
-            try
-                {
-                var r = ReadStrategies(strategiesDir, strats);
-                ReadImportedStrategies(strategiesDir, r, 0);
-                var compiledStrategy = CompileStrategy(r.Values.Where(s => s != null).OrderBy(s => s.Priority).ToList());
-                return compiledStrategy;
-                }
-            catch (Exception e)
-                {
-                log.Error($"Error scanning Build Strategies. {e.Message}", e);
-                return null;
-                }
+            var r = ReadStrategies(strategiesDir, strats);
+            ReadImportedStrategies(strategiesDir, r, 0);
+            var compiledStrategy = CompileStrategy(r.Values.Where(s => s != null).OrderBy(s => s.Priority).ToList());
+            return compiledStrategy;
             }
 
 
@@ -107,12 +100,12 @@ namespace Builder
             {
             string fileName = FindStrategy(strategiesDirectory, strategyName);
             if (string.IsNullOrEmpty(fileName))
-                return null;
+                throw new UserfriendlyException($"Could not find strategy '{strategyName}' in folder {strategiesDirectory} or a subdir of it.");
 
             var xml = XDocument.Load(fileName);
             var strategyNode = xml.Elements().Where(e => string.Equals(e.Name.LocalName, "BuildStrategy",StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
             if (strategyNode == null)
-                return null;
+                throw new UserfriendlyException($"Did not find BuildStrategy root element in '{fileName}'.");
 
             var result = new BuildStrategy();
             result.Priority = priority;
@@ -196,7 +189,7 @@ namespace Builder
                         break;
 
                     default:
-                        log.InfoFormat("Unknown Element encountered: {0} in file {1}", node.Name, fileName);
+                        log.InfoFormat("Unknown Element in BuildStrategy: {0}, File: {1}", node.Name, fileName);
                         break;
                     }
                 }

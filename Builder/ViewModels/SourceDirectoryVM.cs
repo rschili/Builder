@@ -224,7 +224,6 @@ namespace Builder
             ConfigurationPropertiesDialog dialog = new ConfigurationPropertiesDialog();
             dialog.DataContext = new ConfigurationVM(this);
             dialog.Owner = mainWindow;
-            dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             if (dialog.ShowDialog() == true)
                 {
                 ConfigurationVM result = (ConfigurationVM)dialog.DataContext;
@@ -251,7 +250,6 @@ namespace Builder
             SourceDirectoryPropertiesDialog dialog = new SourceDirectoryPropertiesDialog();
             dialog.DataContext = Copy();
             dialog.Owner = mainWindow;
-            dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             if (dialog.ShowDialog() == true)
                 {
                 SourceDirectoryVM result = (SourceDirectoryVM)dialog.DataContext;

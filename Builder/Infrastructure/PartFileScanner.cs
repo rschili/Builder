@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using log4net;
 using Newtonsoft.Json.Linq;
+using RSCoreLib;
 using RSCoreLib.WPF;
 
 namespace Builder
@@ -48,13 +49,12 @@ namespace Builder
             {
             var defaultTarget = strat.DefaultTarget;
             if (defaultTarget == null || string.IsNullOrEmpty(defaultTarget.PartFile) || string.IsNullOrEmpty(defaultTarget.Repository))
-                return null;
+                throw new UserfriendlyException("There is no default target defined for this strategy.");
 
             LocalRepository rep;
             if(!strat.LocalRepositories.TryGetValue(defaultTarget.Repository, out rep) || rep == null)
                 {
-                log.Info($"Did not find repository {defaultTarget.Repository} path.");
-                return null;
+                throw new UserfriendlyException($"Did not find repository {defaultTarget.Repository} path.");
                 }
 
             string path = Path.Combine(srcPath, rep.Directory);
@@ -100,8 +100,7 @@ namespace Builder
 
             if(!File.Exists(fullPath))
                 {
-                log.Info($"Part file not found: {fullPath}.");
-                return null;
+                throw new UserfriendlyException($"Part file not found: {fullPath}.");
                 }
 
             var xml = XDocument.Load(fullPath);

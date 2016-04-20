@@ -84,8 +84,8 @@ namespace Builder
             if (mainWindow != null)
                 {
                 dialog.Owner = mainWindow;
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 }
+
             if (dialog.ShowDialog() == true)
                 {
                 var result = (SettingsVM)dialog.DataContext;
@@ -120,7 +120,6 @@ namespace Builder
                 if (mainWindow != null)
                     {
                     window.Owner = mainWindow;
-                    window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                     }
                 window.Show();
                 _historyWindow = window;
@@ -136,7 +135,6 @@ namespace Builder
             if (mainWindow != null)
                 {
                 dialog.Owner = mainWindow;
-                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 }
 
             dialog.ShowDialog();
@@ -275,7 +273,6 @@ namespace Builder
             SourceDirectoryPropertiesDialog dialog = new SourceDirectoryPropertiesDialog();
             dialog.DataContext = new SourceDirectoryVM(this);
             dialog.Owner = mainWindow;
-            dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             if (dialog.ShowDialog() == true)
                 {
                 SourceDirectoryVM result = (SourceDirectoryVM)dialog.DataContext;

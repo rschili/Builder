@@ -23,10 +23,5 @@ namespace Builder
             {
             InitializeComponent();
             }
-
-        private void Ok_Click (object sender, RoutedEventArgs e)
-            {
-            DialogResult = true;
-            }
         }
     }

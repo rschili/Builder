@@ -4,20 +4,23 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Builder"
+        xmlns:s="clr-namespace:System;assembly=mscorlib"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         xmlns:rsc="clr-namespace:RSCoreLib.WPF;assembly=RSCoreLib"
-        Height="250" 
-        Width="250"
+        Height="450" 
+        Width="350"
         d:DataContext="{d:DesignInstance Type=local:PartExplorerVM, IsDesignTimeCreatable=True}"
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="2"
-        Title="About Builder" ResizeMode="NoResize">
+        Title="{Binding Title, FallbackValue='Part Explorer'}" ResizeMode="CanResizeWithGrip">
     <Window.Resources>
         <rsc:NullCommand x:Key="NullCommand" />
+        <DataTemplate DataType="{x:Type s:String}">
+            <TextBlock Text="{Binding}" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" />
+        </DataTemplate>
     </Window.Resources>
     <Grid>
-        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Dummy" VerticalAlignment="Top" FontSize="16" FontWeight="Bold"/>
-        <Button IsDefault="True" Name="btnDialogOk" Click="Ok_Click" MinWidth="60" Margin="162,178,10,10">_Done</Button>
+        <ContentControl Content="{Binding Content}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
     </Grid>
 </mah:MetroWindow>
