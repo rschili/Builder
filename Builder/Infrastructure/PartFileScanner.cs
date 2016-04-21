@@ -16,8 +16,8 @@ namespace Builder
     {
     public class PartFile
         {
-        public IDictionary<string, Product> Products { get; } = new Dictionary<string, Product>(StringComparer.OrdinalIgnoreCase);
-        public IDictionary<string, Part> Parts { get; } = new Dictionary<string, Part>(StringComparer.OrdinalIgnoreCase);
+        public IList<Product> Products { get; } = new List<Product>();
+        public IList<Part> Parts { get; } = new List<Part>();
         }
 
     public class Part
@@ -45,21 +45,19 @@ namespace Builder
         {
         private static readonly ILog log = LogManager.GetLogger(typeof(PartFileScanner));
         
-        public static IList<Part> DiscoverParts (CompiledBuildStrategy strat, string srcPath)
+        public static PartFile LoadPartFile (string name, string repository, IDictionary<string, LocalRepository> repositories, string srcPath)
             {
-            var defaultTarget = strat.DefaultTarget;
-            if (defaultTarget == null || string.IsNullOrEmpty(defaultTarget.PartFile) || string.IsNullOrEmpty(defaultTarget.Repository))
-                throw new UserfriendlyException("There is no default target defined for this strategy.");
-
             LocalRepository rep;
-            if(!strat.LocalRepositories.TryGetValue(defaultTarget.Repository, out rep) || rep == null)
+            if(!repositories.TryGetValue(repository, out rep) || rep == null)
                 {
-                throw new UserfriendlyException($"Did not find repository {defaultTarget.Repository} path.");
+                throw new UserfriendlyException($"Did not find repository {repository} path.");
                 }
 
-            string path = Path.Combine(srcPath, rep.Directory);
-            PartFile p = LoadPartFile(path, defaultTarget.PartFile);
-            return null;
+            string directory = Path.Combine(srcPath, rep.Directory);
+
+            string fileName = $"{name}.PartFile.xml";
+            string fullPath = Path.Combine(directory, fileName);
+            return LoadPartFile(fullPath);
             }
 
         private static IEnumerable<SubPart> ReadSubParts(XElement node)
@@ -93,11 +91,8 @@ namespace Builder
                 }
             }
 
-        public static PartFile LoadPartFile (string directory, string partFile)
+        public static PartFile LoadPartFile (string fullPath)
             {
-            string fileName = $"{partFile}.PartFile.xml";
-            string fullPath = Path.Combine(directory, fileName);
-
             if(!File.Exists(fullPath))
                 {
                 throw new UserfriendlyException($"Part file not found: {fullPath}.");
@@ -132,7 +127,7 @@ namespace Builder
                             part.SubParts.Add(subPart);
                             }
 
-                        result.Parts[name] = part;
+                        result.Parts.Add(part);
                         break;
 
                     case "Product":
@@ -155,7 +150,7 @@ namespace Builder
                             product.SubProducts.Add(subProduct);
                             }
 
-                        result.Products[pName] = product;
+                        result.Products.Add(product);
                         break;
                         
                     //simply ignore these, they are not relevant

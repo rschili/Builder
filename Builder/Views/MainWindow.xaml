@@ -57,7 +57,8 @@
         </StatusBar>
 
         <!-- ====================TOP LEVEL====================== -->
-        <TreeView x:Name="MainTree" ItemsSource="{Binding RootNodes}" MouseRightButtonDown="TreeViewItem_MouseRightButtonDown" SelectedItemChanged="TreeView_SelectedItemChanged">
+        <TreeView x:Name="MainTree" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+         ItemsSource="{Binding RootNodes}" MouseRightButtonDown="TreeViewItem_MouseRightButtonDown" SelectedItemChanged="TreeView_SelectedItemChanged" >
             <TreeView.Resources>
                 <ContextMenu x:Key="RootContextMenu" Placement="Bottom">
                     <MenuItem Header="Add">
@@ -93,7 +94,11 @@
                     <MenuItem Header="Add">
                         <MenuItem Header="New Configuration..." Command="{Binding AddConfigurationCommand}" />
                     </MenuItem>
-                    <MenuItem Header="Bootstrap" Command="{Binding BootstrapCommand}" />
+                    <MenuItem Header="Bootstrap" Command="{Binding BootstrapCommand}" >
+                        <MenuItem.Icon>
+                            <Image Width="16" Height="16" Source="../Images/vs/bootstrap16.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <Separator />
                     <MenuItem Header="Move Up" Command="{Binding MoveUpCommand}" InputGestureText="Alt+Up" />
                     <MenuItem Header="Move Down" Command="{Binding MoveDownCommand}" InputGestureText="Alt+Down" />
@@ -104,7 +109,11 @@
                         </MenuItem.Icon>
                     </MenuItem>
                     <Separator />
-                    <MenuItem Header="Properties..." Command="{Binding ShowPropertiesCommand}" InputGestureText="Alt+Enter"/>
+                    <MenuItem Header="Properties..." Command="{Binding ShowPropertiesCommand}" InputGestureText="Alt+Enter">
+                        <MenuItem.Icon>
+                            <Image Width="16" Height="16" Source="../Images/vs/properties16.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </ContextMenu>
 
                 <InputBindingCollection x:Key="ConfigurationBindings" x:Shared="False">
@@ -117,7 +126,11 @@
                     <KeyBinding Modifiers="Alt" Key="Down" Command="{Binding MoveDownCommand}" />
                 </InputBindingCollection>
                 <ContextMenu x:Key="ConfigurationContextMenu" Placement="Bottom">
-                    <MenuItem Header="Open Shell..." FontWeight="Bold" Command="{Binding OpenShellCommand}" InputGestureText="Enter" />
+                    <MenuItem Header="Open Shell..." FontWeight="Bold" Command="{Binding OpenShellCommand}" InputGestureText="Enter" >
+                        <MenuItem.Icon>
+                            <Image Width="16" Height="16" Source="../Images/vs/console16.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <Separator />
                     <MenuItem Header="Build" Command="{Binding BuildCommand}">
                         <MenuItem.Icon>
@@ -140,7 +153,11 @@
                     <Separator />
                     <MenuItem Header="Open Folder in File Explorer" Command="{Binding NavigateToCommand}" />
                     <Separator />
-                    <MenuItem Header="Properties..." Command="{Binding ShowPropertiesCommand}" InputGestureText="Alt+Enter" />
+                    <MenuItem Header="Properties..." Command="{Binding ShowPropertiesCommand}" InputGestureText="Alt+Enter" >
+                        <MenuItem.Icon>
+                            <Image Width="16" Height="16" Source="../Images/vs/properties16.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </ContextMenu>
                 
             </TreeView.Resources>
@@ -214,9 +231,6 @@
                                                     <TextBlock Text="{Binding OutPath}" Margin="6,5,0,0" />
                                                     <TextBlock Text="{Binding BuildStrategy}" Margin="6,0,0,0" />
                                                     <TextBlock Text="{Binding Release, StringFormat='{}Release: {0}'}" Margin="6,0,0,0"/>
-                                                    <TextBlock Text="{Binding Incoming, StringFormat='{}Incoming Changes: {0}'}" Margin="6,0,0,0"/>
-                                                    <TextBlock Text="{Binding Outgoing, StringFormat='{}Outgoing Changes: {0}'}" Margin="6,0,0,0"/>
-                                                    <TextBlock Text="{Binding LocalChanges, StringFormat='{}Local Changes: {0}'}" Margin="6,0,0,0"/>
                                                 </StackPanel>
                                             </ToolTip>
                                         </Setter.Value>

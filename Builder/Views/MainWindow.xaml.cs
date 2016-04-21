@@ -67,18 +67,4 @@ namespace Builder
             MainTree.Focus();
             }
         }
-
-    public class ContextMenuItemContainerStyleSelector : StyleSelector
-        {
-        public Style RootStyle { get; set; }
-        public Style BuildEnvironmentStyle { get; set; }
-
-        public override Style SelectStyle (object item, DependencyObject container)
-            {
-            if (item is SourceDirectoryVM)
-                return BuildEnvironmentStyle;
-
-            return RootStyle;
-            }
-        }
     }

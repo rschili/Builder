@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using log4net;
 using RSCoreLib.WPF;
-using static Builder.PartExplorerVM;
 
 namespace Builder
     {
@@ -65,6 +64,7 @@ namespace Builder
             }
 
         public SimpleCommand BuildCommand { get; } = new SimpleCommand(true);
+        public bool IsProduct { get; internal set; }
 
         private bool Build (CancellationToken cancellationToken, ProgressViewModel progress, object parameter)
             {
