@@ -65,7 +65,7 @@ namespace Builder
         {
         private static readonly ILog log = LogManager.GetLogger(typeof(BuildStrategyScanner));
 
-        public static CompiledBuildStrategy LoadCompiledStrategy (string srcPath, string buildStrategies)
+        public static CompiledBuildStrategy LoadCompiledStrategy (string srcPath, string buildStrategies, CancellationToken token)
             {
             if (string.IsNullOrEmpty(srcPath))
                 throw new UserfriendlyException("Source Path must be set");
@@ -81,6 +81,7 @@ namespace Builder
 
             var r = ReadStrategies(strategiesDir, strats);
             ReadImportedStrategies(strategiesDir, r, 0);
+            token.ThrowIfCancellationRequested();
             var compiledStrategy = CompileStrategy(r.Values.Where(s => s != null).OrderBy(s => s.Priority).ToList());
             return compiledStrategy;
             }

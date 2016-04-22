@@ -352,6 +352,7 @@ namespace Builder
                 lock (this)
                     {
                     Progress.IsActive = false;
+                    _cancellationSource?.Dispose();
                     _cancellationSource = null;
                     CommandManager.InvalidateRequerySuggested();
                     }
@@ -365,9 +366,8 @@ namespace Builder
             lock (this)
                 {
                 var source = _cancellationSource;
-                if (source != null)
+                if (source != null && !source.IsCancellationRequested)
                     {
-                    _cancellationSource = null;
                     Progress.StatusMessage = "Cancelling...";
                     Task.Run(() => source.Cancel());
                     }

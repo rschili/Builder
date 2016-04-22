@@ -17,6 +17,7 @@
     <Window.Resources>
         <rsc:NullCommand x:Key="NullCommand" />
         <local:PartTypeToIconConverter x:Key="PartTypeIcon" />
+        <local:PartTypeToLabelConverter x:Key="PartTypeLabel" />
         <DataTemplate DataType="{x:Type s:String}">
             <TextBlock Text="{Binding}" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" />
         </DataTemplate>
@@ -38,8 +39,8 @@
         </HierarchicalDataTemplate>
         <HierarchicalDataTemplate DataType="{x:Type local:PartExplorerElementVM}" ItemsSource="{Binding Children}">
             <StackPanel Orientation="Horizontal">
-                <Image Source="{Binding PartType, Converter={StaticResource PartTypeIcon}}"  Height="16" Width="16" Margin="0,0,6,0"/>
-                <TextBlock Text="{Binding Name}" />
+                <Image Source="{Binding PartType, Converter={StaticResource PartTypeIcon}}" ToolTip="{Binding PartType, Converter={StaticResource PartTypeLabel}}"  Height="16" Width="16" Margin="0,0,6,0"/>
+                <TextBlock Text="{Binding DisplayLabel}" />
             </StackPanel>
         </HierarchicalDataTemplate>
         <DataTemplate DataType="{x:Type local:PartExplorerVM}">

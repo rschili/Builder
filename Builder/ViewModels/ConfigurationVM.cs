@@ -375,7 +375,16 @@ namespace Builder
             PartExplorer dialog = new PartExplorer();
             var vm = new PartExplorerVM(this);
             dialog.DataContext = vm;
-            Task.Run((Action)vm.Initialize).SwallowAndLogExceptions();
+            Task.Run(() =>
+            {
+                using (var cs = new CancellationTokenSource())
+                    {
+                    var closeCancellation = new EventHandler((o,e) => cs.Cancel());
+                    dialog.Closed += closeCancellation;
+                    vm.Initialize(cs.Token);
+                    dialog.Closed -= closeCancellation;
+                    }
+            }).SwallowAndLogExceptions();
             var mainWindow = Application.Current.MainWindow;
             if (mainWindow != null)
                 {
