@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Builder
     {
@@ -56,6 +57,8 @@ namespace Builder
         public bool Release { get; set; } = true;
         [JsonProperty("shellCommands")]
         public string ShellCommands { get; set; }
+        [JsonProperty("expanded")]
+        public bool IsExpanded { get; set; } = false;
 
         [JsonProperty("pinned_parts", NullValueHandling = NullValueHandling.Ignore)]
         public IList<PinnedPart> PinnedParts { get; set; } = new List<PinnedPart>();
@@ -73,18 +76,35 @@ namespace Builder
                 };
             }
         }
-
+    
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class PinnedPart
         {
+        [JsonProperty("alias")]
+        public string Alias { get; set; }
+
         [JsonProperty("name")]
         public string Name { get; set; }
+
+        [JsonProperty("repository")]
+        public string Repository { get; set; }
+
+        [JsonProperty("partfile")]
+        public string PartFile { get; set; }
+
+        [JsonProperty("partType")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        public PartType PartType { get; set; } = PartType.Unknown;
 
         public PinnedPart Copy ()
             {
             return new PinnedPart()
                 {
-                Name = Name
+                Alias = Alias,
+                Name = Name,
+                Repository = Repository,
+                PartFile = PartFile,
+                PartType = PartType
                 };
             }
         }

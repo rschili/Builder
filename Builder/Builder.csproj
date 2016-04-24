@@ -108,6 +108,9 @@
     <Compile Include="ViewModels\ConfigurationVM.cs" />
     <Compile Include="ViewModels\SettingsVM.cs" />
     <Compile Include="ViewModels\SourceDirectoryVM.cs" />
+    <Compile Include="Views\PartPropertiesDialog.xaml.cs">
+      <DependentUpon>PartPropertiesDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PartExplorer.xaml.cs">
       <DependentUpon>PartExplorer.xaml</DependentUpon>
     </Compile>
@@ -127,6 +130,10 @@
       <DependentUpon>SettingsDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\MainVM.cs" />
+    <Page Include="Views\PartPropertiesDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\PartExplorer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

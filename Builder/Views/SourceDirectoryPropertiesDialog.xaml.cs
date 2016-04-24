@@ -17,9 +17,6 @@ using System.Windows.Shapes;
 
 namespace Builder
     {
-    /// <summary>
-    /// Interaction logic for SettingsDialog.xaml
-    /// </summary>
     public partial class SourceDirectoryPropertiesDialog
         {
         public SourceDirectoryPropertiesDialog ()

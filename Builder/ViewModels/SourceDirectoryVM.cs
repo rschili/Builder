@@ -186,7 +186,7 @@ namespace Builder
                 {
                 Model.Configurations.Clear();
                 foreach (var vm in Configurations)
-                    Model.Configurations.Add(vm.Model);
+                    Model.Configurations.Add(vm.RegenerateModel());
                 }
 
             return Model;

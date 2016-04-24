@@ -140,6 +140,10 @@
                     <MenuItem Header="Rebuild" Command="{Binding RebuildCommand}"  />
                     <MenuItem Header="Clean" Command="{Binding CleanCommand}"  />
                     <Separator />
+                    <MenuItem Header="Add">
+                        <MenuItem Header="New Pinned Part..." Command="{Binding AddPartCommand}" />
+                    </MenuItem>
+                    <Separator />
                     <MenuItem Header="Explore Parts..." Command="{Binding ExplorePartsCommand}"  />
                     <Separator />
                     <MenuItem Header="Move Up" Command="{Binding MoveUpCommand}" InputGestureText="Alt+Up" />
@@ -159,7 +163,40 @@
                         </MenuItem.Icon>
                     </MenuItem>
                 </ContextMenu>
-                
+
+
+
+                <InputBindingCollection x:Key="PartBindings" x:Shared="False">
+                    <KeyBinding Modifiers="Alt" Key="Enter" Command="{Binding ShowPropertiesCommand}" />
+                    <KeyBinding Key="Delete" Command="{Binding UnpinCommand}" />
+                    <KeyBinding Modifiers="Alt" Key="Up" Command="{Binding MoveUpCommand}" />
+                    <KeyBinding Modifiers="Alt" Key="Down" Command="{Binding MoveDownCommand}" />
+                </InputBindingCollection>
+                <ContextMenu x:Key="PartContextMenu" Placement="Bottom">
+                    <MenuItem Header="Build" Command="{Binding BuildCommand}">
+                        <MenuItem.Icon>
+                            <Image Width="16" Height="16" Source="../Images/vs/buildOne16.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Rebuild" Command="{Binding RebuildCommand}"  />
+                    <MenuItem Header="Clean" Command="{Binding CleanCommand}"  />
+                    <Separator />
+                    <MenuItem Header="Move Up" Command="{Binding MoveUpCommand}" InputGestureText="Alt+Up" />
+                    <MenuItem Header="Move Down" Command="{Binding MoveDownCommand}" InputGestureText="Alt+Down" />
+                    <Separator />
+                    <MenuItem Header="Unpin" Command="{Binding UnpinCommand}" InputGestureText="Del">
+                        <MenuItem.Icon>
+                            <Image Width="16" Height="16" Source="../Images/vs/pin16.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem Header="Properties..." Command="{Binding ShowPropertiesCommand}" InputGestureText="Alt+Enter" >
+                        <MenuItem.Icon>
+                            <Image Width="16" Height="16" Source="../Images/vs/properties16.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+
             </TreeView.Resources>
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
@@ -236,6 +273,7 @@
                                         </Setter.Value>
                                     </Setter>
                                     <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                                 </Style>
                             </HierarchicalDataTemplate.ItemContainerStyle>
                             <HierarchicalDataTemplate.ItemTemplate>
@@ -250,17 +288,37 @@
                                             Text="{Binding StringFormat='{}↓{0}'}"
                                             Visibility="{Binding Converter={StaticResource NumberToVisibilityConverter}}" />
                                     </StackPanel>
+
+                                    <!-- =================Pinned Parts============================= -->
+                                    <HierarchicalDataTemplate.ItemContainerStyle>
+                                        <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
+                                            <Setter Property="rsc:Behaviors.InputBindings" Value="{StaticResource PartBindings}"/>
+                                            <!--CONTEXT MENU for Part-->
+                                            <Setter Property="ContextMenu" Value="{StaticResource PartContextMenu}" />
+                                            <!--TOOLTIP for Part-->
+                                            <Setter Property="ToolTip">
+                                                <Setter.Value>
+                                                    <ToolTip>
+                                                        <StackPanel Margin="4">
+                                                            <TextBlock FontWeight="Bold" FontSize="14" Text="Pinned Part" />
+                                                            <TextBlock Text="{Binding Name}" Margin="6,5,0,0" />
+                                                            <TextBlock Text="{Binding Repository, StringFormat='{}Repository: {0}'}" Margin="6,0,0,0" />
+                                                            <TextBlock Text="{Binding PartFile, StringFormat='{}PartFile: {0}'}" Margin="6,0,0,0"/>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                                        </Style>
+                                    </HierarchicalDataTemplate.ItemContainerStyle>
                                     <HierarchicalDataTemplate.ItemTemplate>
                                         <DataTemplate>
+                                            <DataTemplate.Resources>
+                                                <local:PartTypeToIconConverter x:Key="PartTypeToImage" />
+                                            </DataTemplate.Resources>
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="../Images/vs/cs16.png" Height="16" Width="16" Margin="0,0,6,0"/>
-                                                <TextBlock Text="{Binding Name}" />
-                                                <TextBlock DataContext="{Binding Outgoing}" Foreground="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Margin="4,0,0,0"
-                              Text="{Binding StringFormat='{}↑{0}'}"
-                              Visibility="{Binding Converter={StaticResource NumberToVisibilityConverter}}" />
-                                                <TextBlock DataContext="{Binding Incoming}" Foreground="{DynamicResource AccentColorBrush}" Margin="4,0,0,0"
-                              Text="{Binding StringFormat='{}↓{0}'}"
-                              Visibility="{Binding Converter={StaticResource NumberToVisibilityConverter}}" />
+                                                <Image Source="{Binding PartType, Converter={StaticResource PartTypeToImage}}" Height="16" Width="16" Margin="0,0,6,0"/>
+                                                <TextBlock Text="{Binding Alias}" />
                                             </StackPanel>
                                         </DataTemplate>
                                     </HierarchicalDataTemplate.ItemTemplate>

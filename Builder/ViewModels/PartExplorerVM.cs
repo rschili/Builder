@@ -496,7 +496,7 @@ namespace Builder
                 case PartType.Reference:
                     return "Reference";
                 default:
-                    return "Uncategorized Part.";
+                    return "Uncategorized Part";
                 }
             }
 

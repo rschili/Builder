@@ -17,10 +17,9 @@ using System.Windows.Shapes;
 
 namespace Builder
     {
-
-    public partial class AboutWindow
+    public partial class PartPropertiesDialog
         {
-        public AboutWindow ()
+        public PartPropertiesDialog ()
             {
             InitializeComponent();
             }
@@ -29,5 +28,6 @@ namespace Builder
             {
             DialogResult = true;
             }
+        
         }
     }

@@ -30,23 +30,23 @@ namespace Builder
                 {
                 foreach (var part in model.PinnedParts)
                     {
-                    PinnedParts.Add(new PartVM(this, null));
+                    PinnedParts.Add(new PartVM(this, part));
                     }
                 }
 
             System.Windows.Data.BindingOperations.EnableCollectionSynchronization(PinnedParts, PinnedParts);
             }
 
-        public ConfigurationVM()
+        public ConfigurationVM ()
             {
             Model = new Configuration();
             Model.Alias = "Foo";
             Model.OutPath = "C:\\Out\\";
             Model.BuildStrategy = "buildstrat";
-            PinnedParts.Add(new PartVM(this) { Name = "Part1" });
-            PinnedParts.Add(new PartVM(this) { Name = "Part2" });
+            PinnedParts.Add(new PartVM());
+            PinnedParts.Add(new PartVM());
             }
-        
+
 
         #region Properties
         public string Alias
@@ -79,7 +79,7 @@ namespace Builder
                 OnPropertyChanged(nameof(Alias));
                 }
             }
-        
+
         public string OutPath
             {
             get
@@ -94,7 +94,7 @@ namespace Builder
                 OnPropertyChanged();
                 }
             }
-        
+
         public string BuildStrategy
             {
             get
@@ -124,7 +124,7 @@ namespace Builder
                 OnPropertyChanged();
                 }
             }
-        
+
         private uint _outgoing = 0;
         public uint Outgoing
             {
@@ -170,6 +170,17 @@ namespace Builder
                 }
             }
 
+        public bool IsExpanded
+            {
+            get { return Model.IsExpanded; }
+            set
+                {
+                Model.IsExpanded = value;
+                OnPropertyChanged();
+                Parent?.Parent?.EnvironmentIsDirty();
+                }
+            }
+
         private bool _isSelected = false;
         public bool IsSelected
             {
@@ -193,12 +204,24 @@ namespace Builder
             }
 
         public bool IsDirty { get; set; } = false;
-        
+
         #endregion
 
         public ConfigurationVM Copy ()
             {
             return new ConfigurationVM(Parent, Model.Copy());
+            }
+
+        internal Configuration RegenerateModel ()
+            {
+            lock (PinnedParts)
+                {
+                Model.PinnedParts.Clear();
+                foreach (var vm in PinnedParts)
+                    Model.PinnedParts.Add(vm.Model);
+                }
+
+            return Model;
             }
 
         private void WireupCommands ()
@@ -222,10 +245,33 @@ namespace Builder
             MoveDownCommand.Handler = MoveDown;
             NavigateToCommand.Handler = NavigateTo;
             ExplorePartsCommand.Handler = ExploreParts;
+            AddPartCommand.Handler = AddPart;
+            }
+
+        public SimpleCommand AddPartCommand { get; } = new SimpleCommand();
+        private void AddPart (object obj)
+            {
+            Window mainWindow = Application.Current.MainWindow;
+            if (mainWindow == null)
+                return;
+
+            PartPropertiesDialog dialog = new PartPropertiesDialog();
+            dialog.DataContext = new PartVM(this, new PinnedPart());
+            dialog.Owner = mainWindow;
+            if (dialog.ShowDialog() == true)
+                {
+                PartVM result = (PartVM)dialog.DataContext;
+
+                PinnedParts.Insert(0, result);
+                if (!IsExpanded)
+                    IsExpanded = true;
+
+                result.IsSelected = true;
+                Parent?.Parent?.EnvironmentIsDirty();
+                }
             }
 
         public SimpleCommand ShowPropertiesCommand { get; } = new SimpleCommand(true);
-
         private void ShowProperties (object obj)
             {
             if (Parent == null)
@@ -238,23 +284,20 @@ namespace Builder
             ConfigurationPropertiesDialog dialog = new ConfigurationPropertiesDialog();
             dialog.DataContext = Copy();
             dialog.Owner = mainWindow;
-            using (Parent.Parent.Progress.ReportIndeterminate())
+            if (dialog.ShowDialog() == true)
                 {
-                if (dialog.ShowDialog() == true)
-                    {
-                    ConfigurationVM result = (ConfigurationVM)dialog.DataContext;
-                    if (!result.IsDirty)
-                        return;
+                ConfigurationVM result = (ConfigurationVM)dialog.DataContext;
+                if (!result.IsDirty)
+                    return;
 
-                    var oldModel = Model;
-                    Model = result.Model;
-                    OnPropertyChanged(nameof(Alias));
-                    OnPropertyChanged(nameof(OutPath));
-                    OnPropertyChanged(nameof(BuildStrategy));
-                    OnPropertyChanged(nameof(Release));
+                var oldModel = Model;
+                Model = result.Model;
+                OnPropertyChanged(nameof(Alias));
+                OnPropertyChanged(nameof(OutPath));
+                OnPropertyChanged(nameof(BuildStrategy));
+                OnPropertyChanged(nameof(Release));
 
-                    Parent.Parent.EnvironmentIsDirty();
-                    }
+                Parent.Parent.EnvironmentIsDirty();
                 }
             }
 
@@ -379,7 +422,7 @@ namespace Builder
             {
                 using (var cs = new CancellationTokenSource())
                     {
-                    var closeCancellation = new EventHandler((o,e) => cs.Cancel());
+                    var closeCancellation = new EventHandler((o, e) => cs.Cancel());
                     dialog.Closed += closeCancellation;
                     vm.Initialize(cs.Token);
                     dialog.Closed -= closeCancellation;
