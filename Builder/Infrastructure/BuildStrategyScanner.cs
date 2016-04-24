@@ -2,15 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using log4net;
-using Newtonsoft.Json.Linq;
 using RSCoreLib;
-using RSCoreLib.WPF;
 
 namespace Builder
     {
@@ -31,11 +26,29 @@ namespace Builder
         public DefaultTarget DefaultTarget { get; set; }
         public List<PartStrategy> PartStrategies { get; } = new List<PartStrategy>();
         public IDictionary<string, LocalRepository> LocalRepositories { get; } = new Dictionary<string, LocalRepository>(StringComparer.OrdinalIgnoreCase);
+
+        //we ignore the repository flag as PartStrategies are only keyed on part file name.
+        internal BuildFromSource GetBuildFromSource (string partFile) //, string repository) 
+            {
+            foreach(var ps in PartStrategies)
+                {
+                if (ps.PartName != "*")
+                    continue;//we don't handle names of specific parts, just work on the part file level for now.
+
+                if (ps.PartFile == "*")
+                    return ps.BuildFromSource;
+
+                if (string.Equals(partFile, ps.PartFile, StringComparison.OrdinalIgnoreCase))
+                    return ps.BuildFromSource;
+                }
+
+            return DefaultPartOptions?.BuildFromSource ?? BuildFromSource.Never;
+            }
         }
 
     public class DefaultPartOptions
         {
-        public string BuildFromSource { get; set; }
+        public BuildFromSource BuildFromSource { get; set; }
         public string OnError { get; set; }
         }
 
@@ -54,11 +67,18 @@ namespace Builder
         public string Directory { get; set; }
         }
 
+    public enum BuildFromSource
+        {
+        Always,
+        Never,
+        Once
+        }
+
     public class PartStrategy
         {
         public string PartFile { get; set; }
         public string PartName { get; set; }
-        public string BuildFromSource { get; set; }
+        public BuildFromSource BuildFromSource { get; set; } = BuildFromSource.Never;
         }
 
     public class BuildStrategyScanner
@@ -141,19 +161,35 @@ namespace Builder
                         break;
 
                     case "DefaultPartOptions":
+                        var fs = node.Attribute("BuildFromSource")?.Value;
+                        if (string.IsNullOrEmpty(fs))
+                            continue;
+
+                        BuildFromSource fse;
+                        if (!Enum.TryParse(fs, out fse))
+                            continue;
+
                         result.DefaultPartOptions = new DefaultPartOptions()
                             {
-                            BuildFromSource = node.Attribute("BuildFromSource")?.Value,
+                            BuildFromSource = fse,
                             OnError = node.Attribute("OnError")?.Value
                             };
                         break;
 
                     case "PartStrategy":
+                        var fromSource = node.Attribute("BuildFromSource")?.Value;
+                        if (string.IsNullOrEmpty(fromSource))
+                            continue;
+
+                        BuildFromSource flag;
+                        if (!Enum.TryParse(fromSource, out flag))
+                            continue;
+
                         result.PartStrategies.Add(new PartStrategy()
                             {
                             PartFile = node.Attribute("PartFile")?.Value,
                             PartName = node.Attribute("PartName")?.Value,
-                            BuildFromSource = node.Attribute("BuildFromSource")?.Value
+                            BuildFromSource = flag
                             });
                         break;
 

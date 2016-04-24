@@ -12,6 +12,7 @@
         d:DataContext="{d:DesignInstance Type=local:SettingsVM, IsDesignTimeCreatable=True}"
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="2"
+        Icon="../Images/vs/properties16.png"  ShowIconOnTitleBar="False"
         Title="Settings" ResizeMode="CanResizeWithGrip" ShowMinButton="False" ShowMaxRestoreButton="False">
     <Window.Resources>
         <Style x:Key="Caption" TargetType="TextBlock">

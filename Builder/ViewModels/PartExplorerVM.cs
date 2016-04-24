@@ -24,7 +24,7 @@ namespace Builder
             {
             }
 
-        private object _content = "Loading...";
+        private object _content = new CallbackMessage("Loading...");
         public object Content
             {
             get
@@ -56,18 +56,18 @@ namespace Builder
             string srcPath = _configuration?.Parent?.SrcPath;
             if (string.IsNullOrEmpty(srcPath) || !Directory.Exists(srcPath))
                 {
-                Content = "Source Dir does not exist.";
+                Content = new CallbackMessage("Source Dir does not exist.");
                 return;
                 }
 
             string strategies = _configuration?.BuildStrategy;
             if (string.IsNullOrEmpty(strategies))
                 {
-                Content = "No Build Strategies defined.";
+                Content = new CallbackMessage("No Build Strategies defined.");
                 return;
                 }
 
-            Content = "Processing Build Strategies...";
+            Content = new CallbackMessage("Processing Build Strategies...");
             try
                 {
                 token.ThrowIfCancellationRequested();
@@ -76,13 +76,13 @@ namespace Builder
                 var dt = compiledStrategy.DefaultTarget;
                 if (dt == null)
                     {
-                    Content = "Strategy has no default target.";
+                    Content = new CallbackMessage("Strategy has no default target.");
                     return;
                     }
 
                 if (string.IsNullOrEmpty(dt.PartFile) || string.IsNullOrEmpty(dt.Repository))
                     {
-                    Content = "Default Target requires a PartFile and Repository attribute.";
+                    Content = new CallbackMessage("Default Target requires a PartFile and Repository attribute.");
                     return;
                     }
 
@@ -91,29 +91,30 @@ namespace Builder
                 }
             catch (UserfriendlyException ue)
                 {
-                Content = ue.Message;
+                Content = new CallbackMessage(ue.Message);
                 }
             catch(Exception e)
                 {
-                Content = "Could not load parts. " + e.Message;
+                Content = new CallbackMessage("Could not load parts. " + e.Message);
                 }
             }
 
         private void InitializePartVMs (CompiledBuildStrategy buildStrategy, string srcPath, CancellationToken token)
             {
-            Content = "Processing Parts...";
+            Content = new CallbackMessage("Processing Parts...");
             var defaultPartFile = PartFileScanner.LoadPartFile(buildStrategy.DefaultTarget.PartFile, buildStrategy.DefaultTarget.Repository, 
                 buildStrategy.LocalRepositories, srcPath);
 
+            BuildFromSource bfs = buildStrategy.GetBuildFromSource(buildStrategy.DefaultTarget.PartFile);
             var products = defaultPartFile.Products.Select(p =>
             {
-                return new { VM = new PartExplorerElementVM(_configuration) { Name = p.Name, IsProduct = true }, Product = p };
+                return new { VM = new PartExplorerElementVM(_configuration) { Name = p.Name, PartType = PartType.Product, FromSource = bfs } , Product = p };
             }).ToList();
             var productVMsByName = products.ToDictionary(a => a.Product.Name, a => a.VM, StringComparer.OrdinalIgnoreCase);
-
+            
             var parts = defaultPartFile.Parts.Select(p =>
             {
-                return new { VM = new PartExplorerElementVM(_configuration) { Name = p.Name, IsProduct = false, MakeFile = p.MakeFile }, Part = p };
+                return new { VM = new PartExplorerElementVM(_configuration) { Name = p.Name, MakeFile = p.MakeFile, FromSource = bfs }, Part = p };
             }).ToList();
             var partVMsByName = parts.ToDictionary(a => a.Part.Name, a => a.VM, StringComparer.OrdinalIgnoreCase);
             token.ThrowIfCancellationRequested();
@@ -148,6 +149,7 @@ namespace Builder
 
             foreach (var part in parts)
                 {
+                part.VM.PartType = DeterminePartType(part.VM, defaultPartFile.Directory, srcPath);
                 foreach (var subPart in part.Part.SubParts)
                     {
                     PartExplorerElementVM vm;
@@ -204,29 +206,54 @@ namespace Builder
                 if (!externalPartFiles.TryGetValue(key, out externalPartFile))
                     {
                     token.ThrowIfCancellationRequested();
-                    var epf = PartFileScanner.LoadPartFile(key.Name, key.Repository,
+                    var bfs = buildStrategy.GetBuildFromSource(key.Name);
+                    if(bfs == BuildFromSource.Never)
+                        {
+                        externalPartFile = new ExternalPartFile() { File = null, Key = key, BuildFromSourceFlag = bfs };
+                        }
+                    else
+                        {
+                        var epf = PartFileScanner.LoadPartFile(key.Name, key.Repository,
                         buildStrategy.LocalRepositories, srcPath);
 
-                    if (epf == null)
-                        throw new UserfriendlyException($"Failed to load part file {key.Name} in repository {key.Repository}");
-
-                    externalPartFile = new ExternalPartFile() { File = epf, Key = key };
+                        if (epf == null)
+                            throw new UserfriendlyException($"Failed to load part file {key.Name} in repository {key.Repository}");
+                        externalPartFile = new ExternalPartFile() { File = epf, Key = key, BuildFromSourceFlag = bfs };
+                        externalPartFile.RelativePath = $"{key.Repository}/{key.Name}";
+                        }
+                    
                     externalPartFiles.Add(key, externalPartFile);
                     }
 
-                PartExplorerElementVM subPartVM = LoadExternalSubpartVM(externalSubparts, sp, externalPartFile);
+                PartExplorerElementVM subPartVM = LoadExternalSubpartVM(externalSubparts, sp, externalPartFile, srcPath);
 
                 currentPart.Item1.AddChild(subPartVM);
                 }
             }
 
-        private PartExplorerElementVM LoadExternalSubpartVM (Queue<Tuple<PartExplorerElementVM, SubPart>> externalSubparts, SubPart sp, ExternalPartFile externalPartFile)
+        private PartExplorerElementVM LoadExternalSubpartVM (Queue<Tuple<PartExplorerElementVM, SubPart>> externalSubparts, SubPart sp, ExternalPartFile externalPartFile, string srcDir)
             {
             PartExplorerElementVM subPartVM;
-            if (!externalPartFile.LoadedParts.TryGetValue(sp.Name, out subPartVM))
+            if (externalPartFile.LoadedParts.TryGetValue(sp.Name, out subPartVM))
+                return subPartVM;
+
+            Part newSubPart = null;
+            if (externalPartFile.BuildFromSourceFlag == BuildFromSource.Never)
                 {
-                var loadedSubPart = externalPartFile.File.Parts.FirstOrDefault(p => string.Equals(p.Name, sp.Name, StringComparison.OrdinalIgnoreCase));
-                if (loadedSubPart == null)
+                subPartVM = new PartExplorerElementVM(_configuration)
+                    {
+                    Name = sp.Name,
+                    Repository = externalPartFile.Key.Repository,
+                    PartFile = externalPartFile.Key.Name,
+                    RelativePath = externalPartFile.RelativePath,
+                    FromSource = externalPartFile.BuildFromSourceFlag,
+                    PartType = PartType.Reference
+                    };
+                }
+            else
+                {
+                newSubPart = externalPartFile.File.Parts.FirstOrDefault(p => string.Equals(p.Name, sp.Name, StringComparison.OrdinalIgnoreCase));
+                if (newSubPart == null)
                     {
                     throw new UserfriendlyException($"Failed to find part {sp.Name} in partfile {sp.PartFile}");
                     }
@@ -236,19 +263,45 @@ namespace Builder
                     Name = sp.Name,
                     Repository = externalPartFile.Key.Repository,
                     PartFile = externalPartFile.Key.Name,
-                    RelativePath = externalPartFile.File.RelativePath,
-                    MakeFile = loadedSubPart.MakeFile
+                    RelativePath = externalPartFile.RelativePath,
+                    MakeFile = newSubPart.MakeFile,
+                    FromSource = externalPartFile.BuildFromSourceFlag,
                     };
 
-                externalPartFile.LoadedParts.Add(sp.Name, subPartVM);
-
-                AddChildVMs(externalSubparts, externalPartFile, subPartVM, loadedSubPart);
+                subPartVM.PartType = DeterminePartType(subPartVM, externalPartFile.File.Directory, srcDir);
                 }
+
+            externalPartFile.LoadedParts.Add(sp.Name, subPartVM);
+
+            if(newSubPart != null)
+                AddChildVMs(externalSubparts, externalPartFile, subPartVM, newSubPart, srcDir);
 
             return subPartVM;
             }
 
-        private void AddChildVMs (Queue<Tuple<PartExplorerElementVM, SubPart>> externalSubparts, ExternalPartFile externalPartFile, PartExplorerElementVM currentVM, Part currentPart)
+        private PartType DeterminePartType (PartExplorerElementVM subPartVM, string repositorySrcDir, string srcDir)
+            {
+            if (string.IsNullOrWhiteSpace(subPartVM.MakeFile))
+                return PartType.Group;
+
+            var makeFile = subPartVM.MakeFile;
+            if (!makeFile.EndsWith(".mke", StringComparison.OrdinalIgnoreCase))
+                return PartType.Unknown;
+
+            string fullPath;
+            if(makeFile.StartsWith("${SrcRoot}", StringComparison.OrdinalIgnoreCase))
+                {
+                fullPath = Path.Combine(srcDir, makeFile.Substring(10));
+                }
+            else
+                {
+                fullPath = Path.Combine(repositorySrcDir, makeFile);
+                }
+
+            return MakeFileScanner.GuessPartTypeFromMakeFile(fullPath);
+            }
+
+        private void AddChildVMs (Queue<Tuple<PartExplorerElementVM, SubPart>> externalSubparts, ExternalPartFile externalPartFile, PartExplorerElementVM currentVM, Part currentPart, string srcDir)
             {
             foreach (var subPart in currentPart.SubParts)
                 {
@@ -261,7 +314,7 @@ namespace Builder
                 PartExplorerElementVM vm;
                 if(!externalPartFile.LoadedParts.TryGetValue(subPart.Name, out vm))
                     {
-                    vm = LoadExternalSubpartVM(externalSubparts, subPart, externalPartFile);
+                    vm = LoadExternalSubpartVM(externalSubparts, subPart, externalPartFile, srcDir);
                     }
 
                 currentVM.AddChild(vm);
@@ -273,6 +326,8 @@ namespace Builder
             public IDictionary<string, PartExplorerElementVM> LoadedParts = new Dictionary<string, PartExplorerElementVM>(StringComparer.OrdinalIgnoreCase);
             public PartFile File;
             public PartFileKey Key;
+            public BuildFromSource BuildFromSourceFlag = BuildFromSource.Never;
+            public string RelativePath;
             }
 
         public class PartFileKey
@@ -313,7 +368,8 @@ namespace Builder
         CSharp,
         Cpp,
         Test,
-        Product
+        Product,
+        Reference
         }
 
     public class PartExplorerElementVM : ViewModelBase
@@ -323,16 +379,18 @@ namespace Builder
         public PartExplorerElementVM (ConfigurationVM _configuration)
             {
             this._configuration = _configuration;
+            WireupCommands();
             }
 
-        public bool IsProduct { get; internal set; }
         public bool HasParent { get; internal set; } = false;
-        public PartType PartType => ResolvePartType();
+        public PartType PartType { get; internal set; } = PartType.Unknown;
+        public BuildFromSource FromSource { get; internal set; } = BuildFromSource.Never;
         public string Name { get; internal set; }
         public string MakeFile { get; set; } = null;
         public IList<PartExplorerElementVM> Children { get; } = new List<PartExplorerElementVM>();
         public string Repository { get; internal set; }
         public string PartFile { get; internal set; }
+        public bool Disabled => FromSource == BuildFromSource.Never;
         
         public string DisplayLabel
             {
@@ -353,18 +411,32 @@ namespace Builder
             vm.HasParent = true;
             }
 
-        private PartType ResolvePartType ()
+        private void WireupCommands ()
             {
-            if (IsProduct)
-                return PartType.Product;
+            PinCommand.Handler = Pin;
+            }
 
-            if (string.IsNullOrEmpty(MakeFile))
-                return PartType.Group;
+        public SimpleCommand PinCommand { get; } = new SimpleCommand();
+        private void Pin (object parameter)
+            {
+            var c = _configuration;
+            if (c == null)
+                return;
 
-            if (Name.Contains("Test"))
-                return PartType.Test;
+            /*
+            var collection = Parent.Configurations;
+            lock (collection)
+                {
+                var index = collection.IndexOf(this);
+                if (index <= 0)
+                    return;
 
-            return PartType.Unknown;
+                var newIndex = index - 1;
+                collection.RemoveAt(index);
+                collection.Insert(newIndex, this);
+                IsSelected = true;
+                Parent.Parent.EnvironmentIsDirty();
+                }*/
             }
         }
 
@@ -379,15 +451,17 @@ namespace Builder
             switch (pt)
                 {
                 case PartType.Group:
-                    return "../Images/vs/group16.png";
-                /*case PartType.CSharp:
+                    return "../Images/vs/emptypart16.png";
+                case PartType.CSharp:
                     return "../Images/vs/cs16.png";
                 case PartType.Cpp:
-                    return "../Images/vs/cpp16.png";*/
+                    return "../Images/vs/cpp16.png";
                 case PartType.Test:
-                    return "../Images/vs/test16.png";
+                    return "../Images/vs/testproject16.png";
                 case PartType.Product:
-                    return "../Images/app16.png";
+                    return "../Images/vs/product16.png";
+                case PartType.Reference:
+                    return "../Images/vs/reference16.png";
                 default:
                     return "../Images/vs/part16.png";
                 }
@@ -419,6 +493,8 @@ namespace Builder
                     return "Test Part";
                 case PartType.Product:
                     return "Product";
+                case PartType.Reference:
+                    return "Reference";
                 default:
                     return "Uncategorized Part.";
                 }
@@ -427,6 +503,21 @@ namespace Builder
         public object ConvertBack (object value, Type targetType, object parameter, CultureInfo culture)
             {
             throw new NotSupportedException();
+            }
+        }
+
+    public class CallbackMessage
+        {
+        private string _message = "";
+        public CallbackMessage(string message)
+            {
+            if (!string.IsNullOrEmpty(message))
+                _message = message;
+            }
+
+        public override string ToString ()
+            {
+            return _message;
             }
         }
     }

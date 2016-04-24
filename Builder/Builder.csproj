@@ -92,6 +92,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Infrastructure\AppDataManager.cs" />
+    <Compile Include="Infrastructure\MakeFileScanner.cs" />
     <Compile Include="Infrastructure\PartFileScanner.cs" />
     <Compile Include="Infrastructure\BuildStrategyScanner.cs" />
     <Compile Include="Infrastructure\SourceDirectoryScanner.cs" />
@@ -254,6 +255,18 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\vs\part16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\vs\pin16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\vs\emptypart16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\vs\product16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\vs\reference16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.100.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.100.0\build\net46\System.Data.SQLite.Core.targets')" />

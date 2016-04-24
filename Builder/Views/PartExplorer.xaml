@@ -8,53 +8,91 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         xmlns:rsc="clr-namespace:RSCoreLib.WPF;assembly=RSCoreLib"
-        Height="450" 
-        Width="350"
+        Height="550" 
+        Width="450"
         d:DataContext="{d:DesignInstance Type=local:PartExplorerVM, IsDesignTimeCreatable=True}"
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="2"
-        Title="{Binding Title, FallbackValue='Part Explorer'}" ResizeMode="CanResizeWithGrip">
+        Icon="../Images/vs/product16.png" ShowIconOnTitleBar="False"
+        Title="{Binding Title, FallbackValue='Part Explorer'}" ResizeMode="CanResize">
     <Window.Resources>
         <rsc:NullCommand x:Key="NullCommand" />
-        <local:PartTypeToIconConverter x:Key="PartTypeIcon" />
-        <local:PartTypeToLabelConverter x:Key="PartTypeLabel" />
-        <DataTemplate DataType="{x:Type s:String}">
+
+        <DataTemplate DataType="{x:Type local:CallbackMessage}">
             <TextBlock Text="{Binding}" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" />
         </DataTemplate>
-        <HierarchicalDataTemplate DataType="{x:Type local:PartElementContainerVM}" ItemsSource="{Binding Items}">
-            <HierarchicalDataTemplate.Resources>
-                <Style TargetType="{x:Type Image}" x:Key="ExpandedFolderImageStyle">
-                    <Setter Property="Source" Value="../Images/vs/folder_closed16.png" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsExpanded}" Value="True">
-                            <Setter Property="Source" Value="../Images/vs/folder_open16.png"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </HierarchicalDataTemplate.Resources>
-            <StackPanel Orientation="Horizontal">
-                <Image Style="{StaticResource ExpandedFolderImageStyle}" Height="16" Width="16" Margin="0,0,6,0"/>
-                <TextBlock Text="{Binding Title}" />
-            </StackPanel>
-        </HierarchicalDataTemplate>
-        <HierarchicalDataTemplate DataType="{x:Type local:PartExplorerElementVM}" ItemsSource="{Binding Children}">
-            <StackPanel Orientation="Horizontal">
-                <Image Source="{Binding PartType, Converter={StaticResource PartTypeIcon}}" ToolTip="{Binding PartType, Converter={StaticResource PartTypeLabel}}"  Height="16" Width="16" Margin="0,0,6,0"/>
-                <TextBlock Text="{Binding DisplayLabel}" />
-            </StackPanel>
-        </HierarchicalDataTemplate>
+
         <DataTemplate DataType="{x:Type local:PartExplorerVM}">
             <TreeView VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
-                ItemsSource="{Binding Items}" MouseRightButtonDown="TreeViewItem_MouseRightButtonDown" >
+                ItemsSource="{Binding Items}" MouseRightButtonDown="TreeViewItem_MouseRightButtonDown">
+                <TreeView.Resources>
+                    <InputBindingCollection x:Key="PartBindings" x:Shared="False">
+                        <MouseBinding Gesture="LeftDoubleClick" Command="{Binding PinCommand}" />
+                    </InputBindingCollection>
+                    <local:PartTypeToIconConverter x:Key="PartTypeIcon" />
+                    <local:PartTypeToLabelConverter x:Key="PartTypeLabel" />
+                    <ContextMenu x:Key="PartContextMenu">
+                        <MenuItem Header="Build" Command="{Binding BuildCommand}">
+                            <MenuItem.Icon>
+                                <Image Width="16" Height="16" Source="../Images/vs/buildOne16.png" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Rebuild" Command="{Binding RebuildCommand}" />
+                        <MenuItem Header="Clean" Command="{Binding CleanCommand}"  />
+                        <Separator />
+                        <MenuItem Header="Pin to Main Window" FontWeight="Bold" Command="{Binding OpenShellCommand}">
+                            <MenuItem.Icon>
+                                <Image Width="16" Height="16" Source="../Images/vs/pin16.png" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ContextMenu>
+                    <HierarchicalDataTemplate DataType="{x:Type local:PartElementContainerVM}" ItemsSource="{Binding Items}">
+                        <HierarchicalDataTemplate.Resources>
+                            <Style TargetType="{x:Type Image}" x:Key="ExpandedFolderImageStyle">
+                                <Setter Property="Source" Value="../Images/vs/folder_closed16.png" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsExpanded}" Value="True">
+                                        <Setter Property="Source" Value="../Images/vs/folder_open16.png"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </HierarchicalDataTemplate.Resources>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Style="{StaticResource ExpandedFolderImageStyle}" Height="16" Width="16" Margin="0,0,6,0"/>
+                            <TextBlock Text="{Binding Title}" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type local:PartExplorerElementVM}" ItemsSource="{Binding Children}">
+                        <DockPanel LastChildFill="True">
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding FromSource}" Margin="6,0,12,0" FontStyle="Italic" FontSize="10.667"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding PartType, Converter={StaticResource PartTypeIcon}}" ToolTip="{Binding PartType, Converter={StaticResource PartTypeLabel}}"  Height="16" Width="16" Margin="0,0,6,0"/>
+                                <TextBlock Text="{Binding DisplayLabel}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Disabled}" Value="True">
+                                                    <Setter Property="Foreground" Value="Gray"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </DockPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.Resources>
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        <Setter Property="ContextMenu" Value="{StaticResource PartContextMenu}" />
+                        <Setter Property="rsc:Behaviors.InputBindings" Value="{StaticResource PartBindings}" />
                     </Style>
                 </TreeView.ItemContainerStyle>
             </TreeView>
         </DataTemplate>
     </Window.Resources>
     <Grid>
-        <ContentControl Content="{Binding Content}"/>
+        <ContentControl Content="{Binding Content}" Margin="6,0,6,6"/>
     </Grid>
 </mah:MetroWindow>

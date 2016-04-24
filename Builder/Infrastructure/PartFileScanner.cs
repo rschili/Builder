@@ -2,15 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using log4net;
-using Newtonsoft.Json.Linq;
 using RSCoreLib;
-using RSCoreLib.WPF;
 
 namespace Builder
     {
@@ -18,7 +12,7 @@ namespace Builder
         {
         public IList<Product> Products { get; } = new List<Product>();
         public IList<Part> Parts { get; } = new List<Part>();
-        public string RelativePath { get; set; }
+        public string Directory { get; internal set; }
         }
 
     public class Part
@@ -58,8 +52,7 @@ namespace Builder
 
             string fileName = $"{name}.PartFile.xml";
             string fullPath = Path.Combine(directory, fileName);
-            string relativePath = Path.Combine(rep.Directory, fileName);
-            return LoadPartFile(fullPath, relativePath);
+            return LoadPartFile(fullPath);
             }
 
         private static IEnumerable<SubPart> ReadSubParts(XElement node)
@@ -93,7 +86,7 @@ namespace Builder
                 }
             }
 
-        public static PartFile LoadPartFile (string fullPath, string relativePath)
+        public static PartFile LoadPartFile (string fullPath)
             {
             if(!File.Exists(fullPath))
                 {
@@ -106,7 +99,7 @@ namespace Builder
                 return null;
 
             var result = new PartFile();
-            result.RelativePath = relativePath;
+            result.Directory = Path.GetDirectoryName(fullPath);
             foreach (var node in rootNode.Elements())
                 {
                 if (node.NodeType != System.Xml.XmlNodeType.Element)

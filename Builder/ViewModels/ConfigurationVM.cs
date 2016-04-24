@@ -311,7 +311,7 @@ namespace Builder
             return await Task.Run(() => JobImplementations.Rebuild(cancellationToken, progress, this));
             }
 
-        public SimpleCommand CleanCommand { get; } = new SimpleCommand(true);
+        public SimpleCommand CleanCommand { get; } = new SimpleCommand();
         private async Task<OperationResult> Clean (CancellationToken cancellationToken, ProgressViewModel progress, object parameter)
             {
             var parent = Parent;
@@ -322,7 +322,7 @@ namespace Builder
             return await Task.Run(() => JobImplementations.Clean(cancellationToken, progress, this));
             }
 
-        public SimpleCommand OpenShellCommand { get; } = new SimpleCommand(true);
+        public SimpleCommand OpenShellCommand { get; } = new SimpleCommand();
 
         private void OpenShell (object parameter)
             {
@@ -333,7 +333,7 @@ namespace Builder
             });
             }
 
-        public SimpleCommand MoveUpCommand { get; } = new SimpleCommand(true);
+        public SimpleCommand MoveUpCommand { get; } = new SimpleCommand();
         private void MoveUp (object parameter)
             {
             var collection = Parent.Configurations;
@@ -351,7 +351,7 @@ namespace Builder
                 }
             }
 
-        public SimpleCommand MoveDownCommand { get; } = new SimpleCommand(true);
+        public SimpleCommand MoveDownCommand { get; } = new SimpleCommand();
         private void MoveDown (object parameter)
             {
             var collection = Parent.Configurations;

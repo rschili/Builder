@@ -10,6 +10,7 @@
         Height="440"
         Width="370"
         MinHeight="250" MinWidth="250"
+        Icon="../Images/vs/properties16.png"  ShowIconOnTitleBar="False"
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="2"
         d:DataContext="{d:DesignInstance Type=local:ConfigurationVM, IsDesignTimeCreatable=True}"

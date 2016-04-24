@@ -12,6 +12,7 @@
         d:DataContext="{d:DesignInstance Type=local:AboutVM, IsDesignTimeCreatable=True}"
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="2"
+        Icon="../Images/App.ico"  ShowIconOnTitleBar="False"
         Title="About Builder" ResizeMode="NoResize">
     <Window.Resources>
         <rsc:NullCommand x:Key="NullCommand" />

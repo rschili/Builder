@@ -12,6 +12,7 @@
         MinHeight="250" MinWidth="250"
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="2"
+        Icon="../Images/vs/properties16.png"  ShowIconOnTitleBar="False"
         d:DataContext="{d:DesignInstance Type=local:SourceDirectoryVM, IsDesignTimeCreatable=True}"
         Title="Properties" ResizeMode="CanResizeWithGrip" ShowMinButton="False" ShowMaxRestoreButton="False">
     <Window.Resources>

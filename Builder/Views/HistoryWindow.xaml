@@ -12,6 +12,7 @@
         d:DataContext="{d:DesignInstance Type=local:HistoryVM, IsDesignTimeCreatable=True}"
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="2"
+        Icon="../Images/vs/buildall16.png"  ShowIconOnTitleBar="False"
         Title="History" ResizeMode="CanResizeWithGrip">
     <Window.Resources>
         <rsc:NullCommand x:Key="NullCommand" />

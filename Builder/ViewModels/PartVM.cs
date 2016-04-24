@@ -68,47 +68,12 @@ namespace Builder
 
         private bool Build (CancellationToken cancellationToken, ProgressViewModel progress, object parameter)
             {
-            var parent = this.Parent;
+            var parent = Parent;
             if (parent == null)
                 return false;
 
             return false;
             }
-
-        private void ProcessLine (string l, StreamWriter sw, ProgressViewModel progress, ref int partCount, ref int partsHandled)
-            {
-            if (l.StartsWith("Starting part"))
-                {
-                if (partCount < 0)
-                    {
-                    var match = Regex.Match(l, @"^Starting\spart\s\(\d+\/(?<PartCount>\d+)\)");
-                    int count;
-                    if (match.Success && int.TryParse(match.Groups["PartCount"].Value, out count) && count > 0)
-                        {
-                        partCount = count;
-                        }
-                    }
-
-                return;
-                }
-
-            if (l.StartsWith("Running parts"))
-                {
-                if (partCount <= 0)
-                    return;
-
-                var match = Regex.Match(l, @"^Running\sparts\s\((?<PartCount>\d+)\sremain");
-                int count;
-                if (match.Success && int.TryParse(match.Groups["PartCount"].Value, out count) && count > 0)
-                    {
-                    var percent = 1.0 - ((double)count / partCount);
-                    progress.Value = (int)(percent * 100);
-                    }
-
-                return;
-                }
-
-            sw.WriteLine(l);
-            }
+        
         }
     }
