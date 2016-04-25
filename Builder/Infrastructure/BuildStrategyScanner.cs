@@ -223,6 +223,7 @@ namespace Builder
                     case "SdkSource":
                     case "TransKitDirectory":
                     case "ToolsetPart":
+                    case "DefaultLastKnownGoodSource":
                         break;
 
                     default:

@@ -46,6 +46,8 @@
                             </MenuItem.Icon>
                         </MenuItem>
                     </ContextMenu>
+
+
                     <HierarchicalDataTemplate DataType="{x:Type local:PartElementContainerVM}" ItemsSource="{Binding Items}">
                         <HierarchicalDataTemplate.Resources>
                             <Style TargetType="{x:Type Image}" x:Key="ExpandedFolderImageStyle">
@@ -57,12 +59,22 @@
                                 </Style.Triggers>
                             </Style>
                         </HierarchicalDataTemplate.Resources>
+                        <HierarchicalDataTemplate.ItemContainerStyle>
+                            <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
+                                <Setter Property="ContextMenu" Value="{StaticResource PartContextMenu}" />
+                                <Setter Property="rsc:Behaviors.InputBindings" Value="{StaticResource PartBindings}" />
+                            </Style>
+                        </HierarchicalDataTemplate.ItemContainerStyle>
+
                         <StackPanel Orientation="Horizontal">
                             <Image Style="{StaticResource ExpandedFolderImageStyle}" Height="16" Width="16" Margin="0,0,6,0"/>
                             <TextBlock Text="{Binding Title}" />
                         </StackPanel>
                     </HierarchicalDataTemplate>
+
+
                     <HierarchicalDataTemplate DataType="{x:Type local:PartExplorerElementVM}" ItemsSource="{Binding Children}">
+
                         <DockPanel LastChildFill="True">
                             <TextBlock DockPanel.Dock="Right" Text="{Binding FromSource}" Margin="6,0,12,0" FontStyle="Italic" FontSize="10.667"/>
                             <StackPanel Orientation="Horizontal">
@@ -84,9 +96,7 @@
                 </TreeView.Resources>
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MetroTreeViewItem}">
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                        <Setter Property="ContextMenu" Value="{StaticResource PartContextMenu}" />
-                        <Setter Property="rsc:Behaviors.InputBindings" Value="{StaticResource PartBindings}" />
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=OneWay}" />
                     </Style>
                 </TreeView.ItemContainerStyle>
             </TreeView>

@@ -26,7 +26,7 @@ namespace Builder
                     return PartType.Cpp;
 
                 if (line.Contains(".cs "))
-                    return PartType.Cpp;
+                    return PartType.CSharp;
                 }
 
             return PartType.Unknown;

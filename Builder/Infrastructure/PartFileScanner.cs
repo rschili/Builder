@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -27,13 +28,11 @@ namespace Builder
         public string Name { get; set; }
         public string Repository { get; set; }
         public string PartFile { get; set; }
+        public bool IsProduct { get; set; } = false;
         }
 
-    public class Product
+    public class Product : Part
         {
-        public string Name { get; set; }
-        public IList<SubPart> SubParts { get; } = new List<SubPart>();
-        public IList<string> SubProducts { get; } = new List<string>();
         }
 
     public class PartFileScanner
@@ -47,15 +46,30 @@ namespace Builder
                 {
                 throw new UserfriendlyException($"Did not find repository {repository} path.");
                 }
-
-            string directory = Path.Combine(srcPath, rep.Directory);
-
             string fileName = $"{name}.PartFile.xml";
+
+            if(fileName.StartsWith("${SrcRoot}", true, CultureInfo.InvariantCulture))
+                {
+                //this is hacky. Some people seem to put the fill path starting with SrcRoot into the Part File Name instead of
+                //having it resolved automatically.
+                var p = Path.Combine(srcPath, fileName.Substring(10));
+                return LoadPartFile(p, Path.GetDirectoryName(p));
+                }
+
+            if (fileName.StartsWith("${SrcBsiCommon}", true, CultureInfo.InvariantCulture))
+                {
+                //this is hacky. Some people seem to put the fill path starting with SrcBsiCommon into the Part File Name instead of
+                //having it resolved automatically.
+                var p = Path.Combine(srcPath, "bsicommon", fileName.Substring(15));
+                return LoadPartFile(p, Path.GetDirectoryName(p));
+                }
+            
+            string directory = Path.Combine(srcPath, rep.Directory);
             string fullPath = Path.Combine(directory, fileName);
-            return LoadPartFile(fullPath);
+            return LoadPartFile(fullPath, repository);
             }
 
-        private static IEnumerable<SubPart> ReadSubParts(XElement node)
+        private static IEnumerable<SubPart> ReadSubParts(XElement node, string repository)
             {
             var subParts = node.Elements().Where(e => e.Name.LocalName.Equals("SubPart", StringComparison.OrdinalIgnoreCase));
             foreach (var subPart in subParts)
@@ -64,29 +78,45 @@ namespace Builder
                 if (string.IsNullOrEmpty(sName))
                     continue;
 
-                yield return new SubPart()
+                var sp = new SubPart()
                     {
                     Name = sName,
                     Repository = subPart.Attribute("Repository")?.Value,
                     PartFile = subPart.Attribute("PartFile")?.Value,
                     };
+
+                if (!string.IsNullOrEmpty(sp.PartFile) && string.IsNullOrEmpty(sp.Repository))
+                    sp.Repository = repository;
+
+                yield return sp;
                 }
             }
 
-        private static IEnumerable<string> ReadSubProducts (XElement node)
+        private static IEnumerable<SubPart> ReadSubProducts (XElement node, string repository)
             {
-            var subParts = node.Elements().Where(e => e.Name.LocalName.Equals("SubPart", StringComparison.OrdinalIgnoreCase));
+            var subParts = node.Elements().Where(e => e.Name.LocalName.Equals("SubProduct", StringComparison.OrdinalIgnoreCase));
             foreach (var subPart in subParts)
                 {
                 var sName = subPart.Attribute("ProductName")?.Value;
                 if (string.IsNullOrEmpty(sName))
                     continue;
 
-                yield return sName;
+                var sp = new SubPart()
+                    {
+                    Name = sName,
+                    Repository = subPart.Attribute("Repository")?.Value,
+                    PartFile = subPart.Attribute("PartFile")?.Value,
+                    IsProduct = true,
+                    };
+
+                if (!string.IsNullOrEmpty(sp.PartFile) && string.IsNullOrEmpty(sp.Repository))
+                    sp.Repository = repository;
+
+                yield return sp;
                 }
             }
-
-        public static PartFile LoadPartFile (string fullPath)
+        
+        public static PartFile LoadPartFile (string fullPath, string repository)
             {
             if(!File.Exists(fullPath))
                 {
@@ -118,7 +148,10 @@ namespace Builder
                             MakeFile = node.Attribute("BentleyBuildMakeFile")?.Value
                             };
 
-                        foreach(var subPart in ReadSubParts(node))
+                        if (string.IsNullOrEmpty(part.MakeFile))
+                            part.MakeFile = node.Attribute("BMakeFile")?.Value;
+
+                        foreach (var subPart in ReadSubParts(node, repository))
                             {
                             part.SubParts.Add(subPart);
                             }
@@ -136,14 +169,14 @@ namespace Builder
                             Name = pName
                             };
 
-                        foreach (var subPart in ReadSubParts(node))
+                        foreach (var subProduct in ReadSubProducts(node, repository))
                             {
-                            product.SubParts.Add(subPart);
+                            product.SubParts.Add(subProduct);
                             }
 
-                        foreach (var subProduct in ReadSubProducts(node))
+                        foreach (var subPart in ReadSubParts(node, repository))
                             {
-                            product.SubProducts.Add(subProduct);
+                            product.SubParts.Add(subPart);
                             }
 
                         result.Products.Add(product);

@@ -96,6 +96,7 @@ namespace Builder
             catch(Exception e)
                 {
                 Content = new CallbackMessage("Could not load parts. " + e.Message);
+                log.Error($"Failed to load parts. {e.Message}.", e);
                 }
             }
 
@@ -122,22 +123,18 @@ namespace Builder
             Queue<Tuple<PartExplorerElementVM, SubPart>> externalSubparts = new Queue<Tuple<PartExplorerElementVM, SubPart>>();
             foreach (var product in products)
                 {
-                foreach (var subProductName in product.Product.SubProducts)
-                    {
-                    PartExplorerElementVM vm;
-                    if (productVMsByName.TryGetValue(subProductName, out vm) && vm != null)
-                        {
-                        product.VM.AddChild(vm);
-                        continue;
-                        }
-
-                    log.Warn($"Product {product.Product.Name} has a subproduct {subProductName} which could not be found.");
-                    }
-
                 foreach(var subPart in product.Product.SubParts)
                     {
                     PartExplorerElementVM vm;
-                    if (partVMsByName.TryGetValue(subPart.Name, out vm) && vm != null)
+                    if(subPart.IsProduct)
+                        {
+                        if (productVMsByName.TryGetValue(subPart.Name, out vm) && vm != null)
+                            {
+                            product.VM.AddChild(vm);
+                            continue;
+                            }
+                        }
+                    else if (partVMsByName.TryGetValue(subPart.Name, out vm) && vm != null)
                         {
                         product.VM.AddChild(vm);
                         continue;
@@ -149,7 +146,7 @@ namespace Builder
 
             foreach (var part in parts)
                 {
-                part.VM.PartType = DeterminePartType(part.VM, defaultPartFile.Directory, srcPath);
+                part.VM.PartType = DeterminePartType(part.VM, false, defaultPartFile.Directory, srcPath);
                 foreach (var subPart in part.Part.SubParts)
                     {
                     PartExplorerElementVM vm;
@@ -213,13 +210,22 @@ namespace Builder
                         }
                     else
                         {
-                        var epf = PartFileScanner.LoadPartFile(key.Name, key.Repository,
-                        buildStrategy.LocalRepositories, srcPath);
+                        try
+                            {
+                            var epf = PartFileScanner.LoadPartFile(key.Name, key.Repository,
+                            buildStrategy.LocalRepositories, srcPath);
 
-                        if (epf == null)
-                            throw new UserfriendlyException($"Failed to load part file {key.Name} in repository {key.Repository}");
-                        externalPartFile = new ExternalPartFile() { File = epf, Key = key, BuildFromSourceFlag = bfs };
-                        externalPartFile.RelativePath = $"{key.Repository}/{key.Name}";
+                            if (epf == null)
+                                throw new UserfriendlyException();
+                            externalPartFile = new ExternalPartFile() { File = epf, Key = key, BuildFromSourceFlag = bfs };
+                            externalPartFile.RelativePath = $"{key.Repository}/{key.Name}";
+                            }
+                        catch(Exception e)
+                            {
+                            log.Error($"Part Explorer Tree will not be complete! Failed to load part file {key.Name} in repository {key.Repository}.", e);
+                            //we don't consider this a failure, just act as if that part file was set to "never build"
+                            externalPartFile = new ExternalPartFile() { File = null, Key = key, BuildFromSourceFlag = BuildFromSource.Never };
+                            }
                         }
                     
                     externalPartFiles.Add(key, externalPartFile);
@@ -252,7 +258,11 @@ namespace Builder
                 }
             else
                 {
-                newSubPart = externalPartFile.File.Parts.FirstOrDefault(p => string.Equals(p.Name, sp.Name, StringComparison.OrdinalIgnoreCase));
+                if(sp.IsProduct)
+                    newSubPart = externalPartFile.File.Products.FirstOrDefault(p => string.Equals(p.Name, sp.Name, StringComparison.OrdinalIgnoreCase));
+                else
+                    newSubPart = externalPartFile.File.Parts.FirstOrDefault(p => string.Equals(p.Name, sp.Name, StringComparison.OrdinalIgnoreCase));
+
                 if (newSubPart == null)
                     {
                     throw new UserfriendlyException($"Failed to find part {sp.Name} in partfile {sp.PartFile}");
@@ -268,7 +278,7 @@ namespace Builder
                     FromSource = externalPartFile.BuildFromSourceFlag,
                     };
 
-                subPartVM.PartType = DeterminePartType(subPartVM, externalPartFile.File.Directory, srcDir);
+                subPartVM.PartType = DeterminePartType(subPartVM, sp.IsProduct, externalPartFile.File.Directory, srcDir);
                 }
 
             externalPartFile.LoadedParts.Add(sp.Name, subPartVM);
@@ -279,8 +289,11 @@ namespace Builder
             return subPartVM;
             }
 
-        private PartType DeterminePartType (PartExplorerElementVM subPartVM, string repositorySrcDir, string srcDir)
+        private PartType DeterminePartType (PartExplorerElementVM subPartVM, bool isProduct, string repositorySrcDir, string srcDir)
             {
+            if (isProduct)
+                return PartType.Product;
+
             if (string.IsNullOrWhiteSpace(subPartVM.MakeFile))
                 return PartType.Group;
 
