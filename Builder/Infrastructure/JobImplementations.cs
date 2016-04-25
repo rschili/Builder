@@ -23,7 +23,7 @@ namespace Builder
 
         internal static OperationResult Build (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
             {
-            var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
+            var shell = configurationVM.SetupEnv();
             var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
             if (vm == null)
                 throw new InvalidOperationException("Could not create new history event");
@@ -104,7 +104,7 @@ namespace Builder
 
         internal static OperationResult Clean (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
             {
-            var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
+            var shell = configurationVM.SetupEnv();
             var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
             if (vm == null)
                 throw new InvalidOperationException("Could not create new history event");
@@ -126,7 +126,7 @@ namespace Builder
 
         internal static OperationResult Rebuild (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
             {
-            var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
+            var shell = configurationVM.SetupEnv();
             var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
             if (vm == null)
                 throw new InvalidOperationException("Could not create new history event");

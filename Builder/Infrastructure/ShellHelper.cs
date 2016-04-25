@@ -13,7 +13,7 @@ namespace Builder
         {
         private static readonly ILog log = LogManager.GetLogger(typeof(ShellHelper));
 
-        public static string TryFindTCC()
+        public static string TryFindTCC ()
             {
             log.Info("Begin checking machine for installed TCC software");
             try
@@ -21,14 +21,14 @@ namespace Builder
                 var software = InstalledSoftwareHelper.GetInstalledSoftware().ToList();
                 return DetermineInstalledTCCVersion(software);
                 }
-            catch(Exception e)
+            catch (Exception e)
                 {
                 log.Error("Failed to scan for installed optional software." + e.Message);
                 return null;
                 }
             }
 
-        private static string DetermineInstalledTCCVersion(IList<InstalledSoftware> software)
+        private static string DetermineInstalledTCCVersion (IList<InstalledSoftware> software)
             {
             var tcc = software.Where(s => s.DisplayName != null && s.DisplayName.StartsWith("TCC LE")).OrderByDescending(o => o.VersionMajor).FirstOrDefault();
             if (tcc == null || string.IsNullOrEmpty(tcc.InstallationPath))
@@ -53,7 +53,7 @@ namespace Builder
             return tccFile;
             }
 
-        public static void OpenNewEnvironmentShell(ICollection<string> setupEnvScript, string workingDirectory, string tccPath)
+        public static void OpenNewEnvironmentShell (ICollection<string> setupEnvScript, string workingDirectory, string tccPath)
             {
             try
                 {
@@ -65,9 +65,9 @@ namespace Builder
                 File.WriteAllLines(batFileName, setupEnvScript);
 
                 ProcessStartInfo startInfo;
-                if(!string.IsNullOrEmpty(tccPath) && File.Exists(tccPath))
+                if (!string.IsNullOrEmpty(tccPath) && File.Exists(tccPath))
                     {
-                    startInfo = new ProcessStartInfo(tccPath, "\"" + batFileName +"\"");
+                    startInfo = new ProcessStartInfo(tccPath, "\"" + batFileName + "\"");
                     }
                 else
                     {
@@ -77,31 +77,62 @@ namespace Builder
                 startInfo.WorkingDirectory = workingDirectory;
                 Process.Start(startInfo);
                 }
-            catch(Exception e)
+            catch (Exception e)
                 {
                 log.ErrorFormat("Failed to open shell. {0}", e.Message);
                 }
             }
 
-        public static ICollection<string> GetSetupEnvScript (string src, string outPath, string strategy, string title)
+        public static ICollection<string> GetSetupEnvScript (string src, string outPath, string strategy, string title, bool debug, params string[] commands)
             {
             var sharedShellPath = Path.Combine(src, @"bsicommon\shell\SharedShellEnv.bat");
             src = PathHelper.EnsureTrailingDirectorySeparator(src);
             outPath = PathHelper.EnsureTrailingDirectorySeparator(outPath);
-            var result = new List<string>()
+            var result = new List<string>();
+            result.Add($"SET BSISRC={src}");
+            result.Add($"SET BSIOUT={outPath}");
+
+            var bb20Path = Path.Combine(src, "BentleyBuild");
+            if (Directory.Exists(bb20Path))
+                result.Add($"SET USE_NEW_BB=1");
+
+            result.Add($"SET BUILDSTRATEGY={strategy}");
+            result.Add($"call \"{sharedShellPath}\"");
+            result.Add($"title {title}");
+
+            foreach(var command in GetShellCommands(commands))
                 {
-                "SET BSISRC=" + src,
-                "SET BSIOUT=" + outPath,
-                "SET USE_NEW_BB=1",
-                "SET BUILDSTRATEGY=" + strategy,
-                "call \"" + sharedShellPath + "\"",
-                "title " + title
-                };
+                result.Add(command);
+                }
+
+            result.Add($"set DEBUG={(debug ? "1" : string.Empty)}");
+            result.Add($"set NDEBUG={(!debug ? "1" : string.Empty)}");
 
             return result;
             }
 
-        public static CommandLineSandbox SetupEnv (string src, string outPath, string strategy, string title)
+        public static IEnumerable<string> GetShellCommands (params string[] commands)
+            {
+            foreach (var c in commands)
+                {
+                if (string.IsNullOrEmpty(c))
+                    continue;
+
+                using (StringReader reader = new StringReader(c))
+                    {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                        {
+                        if (string.IsNullOrEmpty(line))
+                            continue;
+
+                        yield return line;
+                        }
+                    }
+                }
+            }
+
+        public static CommandLineSandbox SetupEnv (string src, string outPath, string strategy, string title, bool debug, params string[] commands)
             {
             CommandLineSandbox cmd = null;
 
@@ -118,13 +149,13 @@ namespace Builder
                     }
 
                 cmd = new CommandLineSandbox(src);
-                foreach(var line in GetSetupEnvScript(src, outPath, strategy, title))
+                foreach (var line in GetSetupEnvScript(src, outPath, strategy, title, debug, commands))
                     {
                     if (!cmd.ExecuteCommand(line).Success)
-                        throw new InvalidOperationException("Failed to run " + line);
+                        throw new UserfriendlyException("Failed to set-up environment. The following command failed: " + line);
                     }
                 }
-            catch(Exception)
+            catch (Exception)
                 {
                 if (cmd != null)
                     cmd.Dispose();
@@ -135,7 +166,7 @@ namespace Builder
             return cmd;
             }
 
-        public static bool OpenDirectoryInExplorer(string directoryPath)
+        public static bool OpenDirectoryInExplorer (string directoryPath)
             {
             if (string.IsNullOrEmpty(directoryPath) || !Directory.Exists(directoryPath))
                 {
@@ -148,7 +179,7 @@ namespace Builder
                 Process.Start(directoryPath);
                 return true;
                 }
-            catch(Exception e)
+            catch (Exception e)
                 {
                 log.WarnFormat("Exception trying to open directory {0}. {1}", directoryPath, e.Message);
                 return false;

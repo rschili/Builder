@@ -335,6 +335,12 @@ namespace Builder
                 {
                 Progress.StatusMessage = prefix + STATUS_CANCELLED_SUFFIX;
                 }
+            catch (Exception e) when (e is UserfriendlyException ||
+                (e is AggregateException && ((AggregateException)e).Flatten().InnerExceptions.Any(i => i is UserfriendlyException)))
+                {
+                Progress.StatusMessage = STATUS_BUILD_PREFIX + STATUS_FAILED_SUFFIX;
+                log.Error("Failed to set-up env", e);
+                }
             catch (Exception e)
                 {
                 if (cancellationToken.IsCancellationRequested)

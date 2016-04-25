@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using log4net;
 using RSCoreLib;
+using RSCoreLib.OS;
 using RSCoreLib.WPF;
 
 namespace Builder
@@ -367,11 +368,19 @@ namespace Builder
 
         public SimpleCommand OpenShellCommand { get; } = new SimpleCommand();
 
+        public CommandLineSandbox SetupEnv()
+            {
+            return ShellHelper.SetupEnv(Parent.SrcPath, OutPath, BuildStrategy, Alias, !Release,
+                    Parent?.Parent?.SettingsVM?.ShellCommands, Parent?.ShellCommands, ShellCommands);
+            }
+
         private void OpenShell (object parameter)
             {
             Task.Run(() =>
             {
-                var bat = ShellHelper.GetSetupEnvScript(Parent.SrcPath, OutPath, BuildStrategy, Alias);
+                var bat = ShellHelper.GetSetupEnvScript(Parent.SrcPath, OutPath, BuildStrategy, Alias, !Release,
+                    Parent?.Parent?.SettingsVM?.ShellCommands, Parent?.ShellCommands, ShellCommands);
+
                 ShellHelper.OpenNewEnvironmentShell(bat, Parent.SrcPath, Parent.Parent.SettingsVM.TCCLePathInternal);
             });
             }

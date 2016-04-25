@@ -22,10 +22,10 @@ namespace Builder
                 if(string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
                     continue;
 
-                if (line.Contains(".cpp "))
+                if (line.Contains(".cpp ") || line.Contains(".vcxproj"))
                     return PartType.Cpp;
 
-                if (line.Contains(".cs "))
+                if (line.Contains(".cs ") || line.Contains(".csproj"))
                     return PartType.CSharp;
                 }
 
