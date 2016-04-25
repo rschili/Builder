@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
@@ -20,7 +21,7 @@ namespace Builder
             internal int PartCount = -1;
             }
 
-        internal static OperationResult Build (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM)
+        internal static OperationResult Build (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
             {
             var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
             var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
@@ -28,11 +29,35 @@ namespace Builder
                 throw new InvalidOperationException("Could not create new history event");
 
             vm.InitializeWith(configurationVM);
-            vm.Command = "bb b";
-            vm.JobName = "Build";
+            if(part == null)
+                vm.Command = "bb b";
+            else
+                {
+                vm.Part = part?.Name;
+                var prefix = BuildPrefix(part);
+                vm.Command = $"bb {prefix} b";
+                }
 
+            vm.JobName = "Build";
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
             return Execute(context, ProcessBuildOutput);
+            }
+
+        private static string BuildPrefix (PinnedPart part)
+            {
+            if (string.IsNullOrEmpty(part?.Name))
+                throw new UserfriendlyException("Provided Part needs a valid name.");
+
+            var args = new List<string>();
+            if (!string.IsNullOrEmpty(part.Repository))
+                args.Add($"-r{part.Repository}");
+
+            if (!string.IsNullOrEmpty(part.PartFile))
+                args.Add($"-f{part.PartFile}");
+
+            args.Add($"-p{part.Name}");
+
+            return string.Join(" ", args);
             }
 
         private static void ProcessBuildOutput (JobContext<BuildInfo> context, ShellOutput o)
@@ -77,7 +102,7 @@ namespace Builder
                 }
             }
 
-        internal static OperationResult Clean (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM)
+        internal static OperationResult Clean (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
             {
             var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
             var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
@@ -85,14 +110,21 @@ namespace Builder
                 throw new InvalidOperationException("Could not create new history event");
 
             vm.InitializeWith(configurationVM);
-            vm.Command = "bb b --tmr --noprompt";
+            if (part == null)
+                vm.Command = "bb b --tmr --noprompt";
+            else
+                {
+                vm.Part = part?.Name;
+                var prefix = BuildPrefix(part);
+                vm.Command = $"bb {prefix} re {part?.Name} -c";
+                }
+                        
             vm.JobName = "Clean";
-
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
             return Execute(context, (c, o) => c.Log.WriteLine(o.Data));
             }
 
-        internal static OperationResult Rebuild (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM)
+        internal static OperationResult Rebuild (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
             {
             var shell = ShellHelper.SetupEnv(configurationVM?.Parent?.SrcPath, configurationVM?.OutPath, configurationVM?.BuildStrategy, "hidden build env");
             var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
@@ -100,9 +132,16 @@ namespace Builder
                 throw new InvalidOperationException("Could not create new history event");
 
             vm.InitializeWith(configurationVM);
-            vm.Command = "bb b --tmrbuild --noprompt";
+            if (part == null)
+                vm.Command = "bb b --tmrbuild --noprompt";
+            else
+                {
+                vm.Part = part?.Name;
+                var prefix = BuildPrefix(part);
+                vm.Command = $"bb {prefix} re {part?.Name}";
+                }
+            
             vm.JobName = "Rebuild";
-
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
             return Execute(context, ProcessBuildOutput);
             }

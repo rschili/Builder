@@ -118,6 +118,7 @@ namespace Builder
             "outDir TEXT," +
             "release INTEGER," +
             "platform TEXT," +
+            "part TEXT," +
             "resultCode INTEGER," +
             "secondsDuration REAL" +
             ")";

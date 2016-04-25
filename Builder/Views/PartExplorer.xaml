@@ -40,7 +40,7 @@
                         <MenuItem Header="Rebuild" Command="{Binding RebuildCommand}" />
                         <MenuItem Header="Clean" Command="{Binding CleanCommand}"  />
                         <Separator />
-                        <MenuItem Header="Pin to Main Window" FontWeight="Bold" Command="{Binding OpenShellCommand}">
+                        <MenuItem Header="Pin to Main Window" FontWeight="Bold" Command="{Binding PinCommand}">
                             <MenuItem.Icon>
                                 <Image Width="16" Height="16" Source="../Images/vs/pin16.png" />
                             </MenuItem.Icon>

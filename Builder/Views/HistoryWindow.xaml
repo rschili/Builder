@@ -56,6 +56,7 @@
                 <DataGridTextColumn Header="Job" Binding="{Binding JobName}" Width="*" />
                 <DataGridTextColumn Header="Strategy" Binding="{Binding BuildStrategy}" Width="*" />
                 <DataGridTextColumn Header="Stream" Binding="{Binding Stream}" Width="*" />
+                <DataGridTextColumn Header="Part" Binding="{Binding Part}" Width="*" />
                 <DataGridTextColumn Header="Result" Binding="{Binding Result}" Width="*" />
             </DataGrid.Columns>
             

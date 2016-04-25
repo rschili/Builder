@@ -206,6 +206,20 @@ namespace Builder
                 }
             }
 
+        private string _part;
+        public string Part
+            {
+            get { return _part; }
+            set
+                {
+                if (_part == value)
+                    return;
+
+                _part = value;
+                OnPropertyChanged();
+                }
+            }
+
         private HistoryEventResult _result;
         public HistoryEventResult Result
             {
@@ -241,8 +255,8 @@ namespace Builder
             using (var command = new SQLiteCommand(connection))
                 {
                 command.CommandText = $"INSERT INTO {AppDataManager.HISTORY_TABLENAME}"+
-                    "(command,jobName,startTime,resultCode,buildStrategy,stream,sourceDir,outDir,release, platform) "+
-                    "VALUES(@pCmd,@pJob, datetime('now'),0,@buildStrat,@stream,@sourceDir,@outDir,@release,@platform)";
+                    "(command,jobName,startTime,resultCode,buildStrategy,stream,sourceDir,outDir,release, platform, part) "+
+                    "VALUES(@pCmd,@pJob, datetime('now'),0,@buildStrat,@stream,@sourceDir,@outDir,@release,@platform,@part)";
                 command.Parameters.AddWithValue("pCmd", Command);
                 command.Parameters.AddWithValue("pJob", JobName);
 
@@ -252,6 +266,7 @@ namespace Builder
                 command.Parameters.AddWithValue("outDir", OutDir);
                 command.Parameters.AddWithValue("release", Release);
                 command.Parameters.AddWithValue("platform", Platform);
+                command.Parameters.AddWithValue("part", Part);
                 command.ExecuteNonQuery();
                 var id = connection.LastInsertRowId;
                 ID = id;

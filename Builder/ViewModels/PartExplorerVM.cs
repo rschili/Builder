@@ -427,6 +427,14 @@ namespace Builder
         private void WireupCommands ()
             {
             PinCommand.Handler = Pin;
+            BuildCommand.Handler = Build;
+            BuildCommand.CanExecuteHandler = p => _configuration?.BuildCommand.CanExecute(p);
+
+            RebuildCommand.Handler = Rebuild;
+            BuildCommand.CanExecuteHandler = p => _configuration?.RebuildCommand.CanExecute(p);
+
+            CleanCommand.Handler = Clean;
+            BuildCommand.CanExecuteHandler = p => _configuration?.CleanCommand.CanExecute(p);
             }
 
         public SimpleCommand PinCommand { get; } = new SimpleCommand();
@@ -436,20 +444,37 @@ namespace Builder
             if (c == null)
                 return;
 
-            /*
-            var collection = Parent.Configurations;
-            lock (collection)
-                {
-                var index = collection.IndexOf(this);
-                if (index <= 0)
-                    return;
+            PinnedPart pinnedPart = GenerateModel();
+            c.AddPartCommand.Execute(pinnedPart);
+            }
 
-                var newIndex = index - 1;
-                collection.RemoveAt(index);
-                collection.Insert(newIndex, this);
-                IsSelected = true;
-                Parent.Parent.EnvironmentIsDirty();
-                }*/
+        private PinnedPart GenerateModel ()
+            {
+            return new PinnedPart()
+                {
+                Name = Name,
+                Repository = Repository,
+                PartFile = PartFile,
+                PartType = PartType
+                };
+            }
+
+        public SimpleCommand BuildCommand { get; } = new SimpleCommand(true);
+        private void Build (object parameter)
+            {
+            _configuration?.BuildCommand?.Execute(GenerateModel());
+            }
+
+        public SimpleCommand RebuildCommand { get; } = new SimpleCommand(true);
+        private void Rebuild (object parameter)
+            {
+            _configuration?.RebuildCommand?.Execute(GenerateModel());
+            }
+
+        public SimpleCommand CleanCommand { get; } = new SimpleCommand(true);
+        private void Clean (object parameter)
+            {
+            _configuration?.CleanCommand?.Execute(GenerateModel());
             }
         }
 

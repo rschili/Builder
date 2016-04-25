@@ -54,7 +54,7 @@ Version History
 
 **Short term**
 
--   Part Browser, allow pinning specific parts below a configuration node in the tree so only that part may be build
+-   Search in Part Browser, using wildcards
 
 **Long term**
 
@@ -66,6 +66,7 @@ Version History
 
 **1.0 Initial Release Latest additions**
 
+-   **Part Browser**, allow pinning specific parts below a configuration node in the tree so only that part may be build
 -   **History** Window displaying Jobs of current session, jump to logfile by double-clicking a row
 -   **About-Window** that displays available updates and installed software
 -   resolve automatic TCC path on demand instead of scanning on every launch

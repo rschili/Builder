@@ -256,7 +256,7 @@ namespace Builder
                 return;
 
             PartPropertiesDialog dialog = new PartPropertiesDialog();
-            dialog.DataContext = new PartVM(this, new PinnedPart());
+            dialog.DataContext = new PartVM(this, obj as PinnedPart ?? new PinnedPart());
             dialog.Owner = mainWindow;
             if (dialog.ShowDialog() == true)
                 {
@@ -297,7 +297,7 @@ namespace Builder
                 OnPropertyChanged(nameof(BuildStrategy));
                 OnPropertyChanged(nameof(Release));
 
-                Parent.Parent.EnvironmentIsDirty();
+                Parent?.Parent?.EnvironmentIsDirty();
                 }
             }
 
@@ -340,7 +340,7 @@ namespace Builder
                 return OperationResult.Failed;
 
             progress.IsIndeterminate = true;
-            return await Task.Run(() => JobImplementations.Build(cancellationToken, progress, this));
+            return await Task.Run(() => JobImplementations.Build(cancellationToken, progress, this, parameter as PinnedPart));
             }
 
         public SimpleCommand RebuildCommand { get; } = new SimpleCommand(true);
@@ -351,7 +351,7 @@ namespace Builder
                 return OperationResult.Failed;
 
             progress.IsIndeterminate = true;
-            return await Task.Run(() => JobImplementations.Rebuild(cancellationToken, progress, this));
+            return await Task.Run(() => JobImplementations.Rebuild(cancellationToken, progress, this, parameter as PinnedPart));
             }
 
         public SimpleCommand CleanCommand { get; } = new SimpleCommand();
@@ -362,7 +362,7 @@ namespace Builder
                 return OperationResult.Failed;
 
             progress.IsIndeterminate = true;
-            return await Task.Run(() => JobImplementations.Clean(cancellationToken, progress, this));
+            return await Task.Run(() => JobImplementations.Clean(cancellationToken, progress, this, parameter as PinnedPart));
             }
 
         public SimpleCommand OpenShellCommand { get; } = new SimpleCommand();

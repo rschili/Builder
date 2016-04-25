@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using log4net;
 using RSCoreLib.WPF;
@@ -21,8 +23,7 @@ namespace Builder
             {
             Parent = parent;
             Model = model;
-            //BuildCommand.Handler = p => Parent.Parent.Parent.RunOperation(Build, "Build", p);
-            UnpinCommand.Handler = Unpin;
+            WireupCommands();
             }
 
         public PartVM ()
@@ -143,6 +144,23 @@ namespace Builder
             return new PartVM(Parent, Model.Copy());
             }
 
+        private void WireupCommands ()
+            {
+            UnpinCommand.Handler = Unpin;
+            MoveUpCommand.Handler = MoveUp;
+            MoveDownCommand.Handler = MoveDown;
+            BuildCommand.Handler = Build;
+            BuildCommand.CanExecuteHandler = p => Parent?.BuildCommand.CanExecute(p);
+
+            RebuildCommand.Handler = Rebuild;
+            BuildCommand.CanExecuteHandler = p => Parent?.RebuildCommand.CanExecute(p);
+
+            CleanCommand.Handler = Clean;
+            BuildCommand.CanExecuteHandler = p => Parent?.CleanCommand.CanExecute(p);
+
+            ShowPropertiesCommand.Handler = ShowProperties;
+            }
+
         public SimpleCommand UnpinCommand { get; } = new SimpleCommand(true);
         private void Unpin (object obj)
             {
@@ -160,18 +178,90 @@ namespace Builder
                 }
             }
 
-        public SimpleCommand BuildCommand { get; } = new SimpleCommand(true);
-        public bool IsProduct { get; internal set; }
-
-        private bool Build (CancellationToken cancellationToken, ProgressViewModel progress, object parameter)
+        public SimpleCommand MoveUpCommand { get; } = new SimpleCommand();
+        private void MoveUp (object parameter)
             {
-            var parent = Parent;
-            if (parent == null)
-                return false;
+            var collection = Parent.PinnedParts;
+            lock (collection)
+                {
+                var index = collection.IndexOf(this);
+                if (index <= 0)
+                    return;
 
-            return false;
+                var newIndex = index - 1;
+                collection.RemoveAt(index);
+                collection.Insert(newIndex, this);
+                IsSelected = true;
+                Parent?.Parent?.Parent?.EnvironmentIsDirty();
+                }
             }
 
+        public SimpleCommand MoveDownCommand { get; } = new SimpleCommand();
+        private void MoveDown (object parameter)
+            {
+            var collection = Parent.PinnedParts;
+            lock (collection)
+                {
+                var index = collection.IndexOf(this);
+                if (index < 0 || index >= (collection.Count - 1))
+                    return;
+
+                var newIndex = index + 1;
+                collection.RemoveAt(index);
+                collection.Insert(newIndex, this);
+                IsSelected = true;
+                Parent?.Parent?.Parent?.EnvironmentIsDirty();
+                }
+            }
+
+        public SimpleCommand BuildCommand { get; } = new SimpleCommand(true);
+        private void Build (object parameter)
+            {
+            Parent?.BuildCommand?.Execute(Model);
+            }
+
+        public SimpleCommand RebuildCommand { get; } = new SimpleCommand(true);
+        private void Rebuild (object parameter)
+            {
+            Parent?.RebuildCommand?.Execute(Model);
+            }
+
+        public SimpleCommand CleanCommand { get; } = new SimpleCommand(true);
+        private void Clean (object parameter)
+            {
+            Parent?.CleanCommand?.Execute(Model);
+            }
+
+        public SimpleCommand ShowPropertiesCommand { get; } = new SimpleCommand(true);
+        private void ShowProperties (object obj)
+            {
+            if (Parent == null)
+                return;
+
+            Window mainWindow = Application.Current.MainWindow;
+            if (mainWindow == null)
+                return;
+
+            PartPropertiesDialog dialog = new PartPropertiesDialog();
+            dialog.DataContext = Copy();
+            dialog.Owner = mainWindow;
+            if (dialog.ShowDialog() == true)
+                {
+                PartVM result = (PartVM)dialog.DataContext;
+                if (!result.IsDirty)
+                    return;
+
+                var oldModel = Model;
+                Model = result.Model;
+                OnPropertyChanged(nameof(Alias));
+                OnPropertyChanged(nameof(Name));
+                OnPropertyChanged(nameof(PartType));
+                OnPropertyChanged(nameof(Repository));
+                OnPropertyChanged(nameof(PartFile));
+
+                Parent?.Parent?.Parent?.EnvironmentIsDirty();
+                }
+            }
         }
 
     public static class PartTypeHelper
