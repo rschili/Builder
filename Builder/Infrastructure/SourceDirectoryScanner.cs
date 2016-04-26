@@ -103,8 +103,8 @@ namespace Builder
                 current.GetAccessControl();
 
                 return false;
-                }
-            catch (Exception e) when (e is UnauthorizedAccessException || e is DirectoryNotFoundException)
+                }               //We also get aggregate exceptions here, just skip anyways on all exceptions
+            catch (Exception)// when (e is UnauthorizedAccessException || e is DirectoryNotFoundException)
                 {
                 return true;
                 }

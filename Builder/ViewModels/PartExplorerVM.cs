@@ -111,13 +111,18 @@ namespace Builder
             {
                 return new { VM = new PartExplorerElementVM(_configuration) { Name = p.Name, PartType = PartType.Product, FromSource = bfs } , Product = p };
             }).ToList();
-            var productVMsByName = products.ToDictionary(a => a.Product.Name, a => a.VM, StringComparer.OrdinalIgnoreCase);
+            var productVMsByName = new Dictionary<string, PartExplorerElementVM>(StringComparer.Ordinal);
+            foreach (var a in products)
+                productVMsByName[a.Product.Name] = a.VM;
             
             var parts = defaultPartFile.Parts.Select(p =>
             {
                 return new { VM = new PartExplorerElementVM(_configuration) { Name = p.Name, MakeFile = p.MakeFile, FromSource = bfs }, Part = p };
             }).ToList();
-            var partVMsByName = parts.ToDictionary(a => a.Part.Name, a => a.VM, StringComparer.OrdinalIgnoreCase);
+            var partVMsByName = new Dictionary<string, PartExplorerElementVM>(StringComparer.Ordinal);
+            foreach (var a in parts)
+                partVMsByName[a.Part.Name] = a.VM;
+            
             token.ThrowIfCancellationRequested();
 
             Queue<Tuple<PartExplorerElementVM, SubPart>> externalSubparts = new Queue<Tuple<PartExplorerElementVM, SubPart>>();
@@ -150,8 +155,15 @@ namespace Builder
                 foreach (var subPart in part.Part.SubParts)
                     {
                     PartExplorerElementVM vm;
-                    if (string.IsNullOrEmpty(subPart.Repository) && string.IsNullOrEmpty(subPart.PartFile) &&
-                        partVMsByName.TryGetValue(subPart.Name, out vm) && vm != null)
+                    if (subPart.IsProduct)
+                        {
+                        if (productVMsByName.TryGetValue(subPart.Name, out vm) && vm != null)
+                            {
+                            part.VM.AddChild(vm);
+                            continue;
+                            }
+                        }
+                    else if (partVMsByName.TryGetValue(subPart.Name, out vm) && vm != null)
                         {
                         part.VM.AddChild(vm);
                         continue;
@@ -218,7 +230,6 @@ namespace Builder
                             if (epf == null)
                                 throw new UserfriendlyException();
                             externalPartFile = new ExternalPartFile() { File = epf, Key = key, BuildFromSourceFlag = bfs };
-                            externalPartFile.RelativePath = $"{key.Repository}/{key.Name}";
                             }
                         catch(Exception e)
                             {
@@ -226,6 +237,8 @@ namespace Builder
                             //we don't consider this a failure, just act as if that part file was set to "never build"
                             externalPartFile = new ExternalPartFile() { File = null, Key = key, BuildFromSourceFlag = BuildFromSource.Never };
                             }
+
+                        externalPartFile.RelativePath = $"{key.Repository}/{key.Name}";
                         }
                     
                     externalPartFiles.Add(key, externalPartFile);
@@ -265,7 +278,8 @@ namespace Builder
 
                 if (newSubPart == null)
                     {
-                    throw new UserfriendlyException($"Failed to find part {sp.Name} in partfile {sp.PartFile}");
+                    log.Warn($"Failed to find part {sp.Name} in partfile {sp.PartFile}");
+                    newSubPart = new Part() { Name = sp.Name }; //use a dummy instead
                     }
 
                 subPartVM = new PartExplorerElementVM(_configuration)

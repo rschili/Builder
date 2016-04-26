@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -368,7 +369,7 @@ namespace Builder
 
         public SimpleCommand OpenShellCommand { get; } = new SimpleCommand();
 
-        public CommandLineSandbox SetupEnv()
+        public CommandLineSandbox SetupEnv ()
             {
             return ShellHelper.SetupEnv(Parent.SrcPath, OutPath, BuildStrategy, Alias, !Release,
                     Parent?.Parent?.SettingsVM?.ShellCommands, Parent?.ShellCommands, ShellCommands);
@@ -378,10 +379,14 @@ namespace Builder
             {
             Task.Run(() =>
             {
+                var tccPath = Parent?.Parent?.SettingsVM?.TCCLePathInternal;
+                var tccExists = !string.IsNullOrEmpty(tccPath) && File.Exists(tccPath);
+
                 var bat = ShellHelper.GetSetupEnvScript(Parent.SrcPath, OutPath, BuildStrategy, Alias, !Release,
+                    tccExists,
                     Parent?.Parent?.SettingsVM?.ShellCommands, Parent?.ShellCommands, ShellCommands);
 
-                ShellHelper.OpenNewEnvironmentShell(bat, Parent.SrcPath, Parent.Parent.SettingsVM.TCCLePathInternal);
+                ShellHelper.OpenNewEnvironmentShell(bat, Parent.SrcPath, tccPath);
             });
             }
 

@@ -120,7 +120,8 @@ namespace Builder
             {
             if(!File.Exists(fullPath))
                 {
-                throw new UserfriendlyException($"Part file not found: {fullPath}.");
+                log.Warn($"Part file not found: {fullPath}.");
+                return new PartFile() { Directory = Path.GetDirectoryName(fullPath) };
                 }
 
             var xml = XDocument.Load(fullPath);
@@ -150,6 +151,11 @@ namespace Builder
 
                         if (string.IsNullOrEmpty(part.MakeFile))
                             part.MakeFile = node.Attribute("BMakeFile")?.Value;
+
+                        foreach (var subProduct in ReadSubProducts(node, repository))
+                            {
+                            part.SubParts.Add(subProduct);
+                            }
 
                         foreach (var subPart in ReadSubParts(node, repository))
                             {
@@ -184,6 +190,7 @@ namespace Builder
                         
                     //simply ignore these, they are not relevant
                     case "ProductDirectoryList":
+                    case "MultiPlatform":
                         break;
 
                     default:

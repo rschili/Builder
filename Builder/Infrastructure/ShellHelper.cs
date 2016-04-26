@@ -83,7 +83,7 @@ namespace Builder
                 }
             }
 
-        public static ICollection<string> GetSetupEnvScript (string src, string outPath, string strategy, string title, bool debug, params string[] commands)
+        public static ICollection<string> GetSetupEnvScript (string src, string outPath, string strategy, string title, bool debug, bool tcc, params string[] commands)
             {
             var sharedShellPath = Path.Combine(src, @"bsicommon\shell\SharedShellEnv.bat");
             src = PathHelper.EnsureTrailingDirectorySeparator(src);
@@ -102,6 +102,24 @@ namespace Builder
 
             foreach(var command in GetShellCommands(commands))
                 {
+                if(command.StartsWith("!TCC"))
+                    {
+                    if (!tcc)
+                        continue;
+
+                    result.Add(command.Substring(4));
+                    continue;
+                    }
+
+                if (command.StartsWith("!CMD"))
+                    {
+                    if (tcc)
+                        continue;
+
+                    result.Add(command.Substring(4));
+                    continue;
+                    }
+
                 result.Add(command);
                 }
 
@@ -149,7 +167,7 @@ namespace Builder
                     }
 
                 cmd = new CommandLineSandbox(src);
-                foreach (var line in GetSetupEnvScript(src, outPath, strategy, title, debug, commands))
+                foreach (var line in GetSetupEnvScript(src, outPath, strategy, title, debug, false, commands))
                     {
                     if (!cmd.ExecuteCommand(line).Success)
                         throw new UserfriendlyException("Failed to set-up environment. The following command failed: " + line);

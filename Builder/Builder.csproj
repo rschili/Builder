@@ -38,6 +38,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowedReferenceRelatedFileExtensions>
+      <!-- Prevent default XML and PDB files copied to output in RELEASE. 
+           Only *.allowedextension files will be included, which don't exist.
+       -->
+      .allowedextension
+    </AllowedReferenceRelatedFileExtensions> 
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Images\app.ico</ApplicationIcon>
