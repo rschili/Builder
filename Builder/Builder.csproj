@@ -43,7 +43,7 @@
            Only *.allowedextension files will be included, which don't exist.
        -->
       .allowedextension
-    </AllowedReferenceRelatedFileExtensions> 
+    </AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Images\app.ico</ApplicationIcon>
@@ -114,6 +114,9 @@
     <Compile Include="ViewModels\ConfigurationVM.cs" />
     <Compile Include="ViewModels\SettingsVM.cs" />
     <Compile Include="ViewModels\SourceDirectoryVM.cs" />
+    <Compile Include="Views\OutputWindow.xaml.cs">
+      <DependentUpon>OutputWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PartPropertiesDialog.xaml.cs">
       <DependentUpon>PartPropertiesDialog.xaml</DependentUpon>
     </Compile>
@@ -136,6 +139,10 @@
       <DependentUpon>SettingsDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\MainVM.cs" />
+    <Page Include="Views\OutputWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\PartPropertiesDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

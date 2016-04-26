@@ -51,6 +51,7 @@ namespace Builder
             {
             ShowSettingsCommand.Handler = ShowSettings;
             ShowHistoryCommand.Handler = ShowHistory;
+            ShowOutputCommand.Handler = ShowOutput;
             ShowAboutCommand.Handler = ShowAbout;
             ShowUICommand.Handler = ShowMainUI;
             HideUICommand.Handler = HideMainUI;
@@ -123,6 +124,34 @@ namespace Builder
                     }
                 window.Show();
                 _historyWindow = window;
+                }
+            }
+
+        private OutputWindow _outputWindow = null;
+        public SimpleCommand ShowOutputCommand { get; } = new SimpleCommand();
+        private void ShowOutput (object obj)
+            {
+            lock (this)
+                {
+                OutputWindow window = _outputWindow;
+                if (window != null && window.IsVisible)
+                    {
+                    if (window.WindowState == WindowState.Minimized)
+                        window.WindowState = WindowState.Normal;
+
+                    window.Activate();
+                    return;
+                    }
+
+                window = new OutputWindow();
+                window.DataContext = this;
+                var mainWindow = Application.Current.MainWindow;
+                if (mainWindow != null)
+                    {
+                    window.Owner = mainWindow;
+                    }
+                window.Show();
+                _outputWindow = window;
                 }
             }
 

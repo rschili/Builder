@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using log4net;
 using RSCoreLib.WPF;
@@ -24,19 +25,37 @@ namespace Builder
 
         public HistoryVM ()
             {
-            Entries.Add(new HistoryEventVM() { ID = 1, JobName = "Rebuild", Result = HistoryEventResult.Failed });
-            Entries.Add(new HistoryEventVM() { ID = 2, JobName = "Rebuild", Result = HistoryEventResult.Failed });
-            Entries.Add(new HistoryEventVM() { ID = 3, JobName = "Build", Result = HistoryEventResult.Failed });
-            Entries.Add(new HistoryEventVM() { ID = 42, JobName = "Bootstrap", Result = HistoryEventResult.Success });
+            Entries.Add(new HistoryEventVM(this) { ID = 1, JobName = "Rebuild", Result = HistoryEventResult.Failed });
+            Entries.Add(new HistoryEventVM(this) { ID = 2, JobName = "Rebuild", Result = HistoryEventResult.Failed });
+            Entries.Add(new HistoryEventVM(this) { ID = 3, JobName = "Build", Result = HistoryEventResult.Failed });
+            Entries.Add(new HistoryEventVM(this) { ID = 42, JobName = "Bootstrap", Result = HistoryEventResult.Success });
             }
         
         public HistoryEventVM CreateHistoryEvent()
             {
-            var vm = new HistoryEventVM();
+            _output = "";
+            var vm = new HistoryEventVM(this);
             lock (Entries)
                 Entries.Insert(0, vm);
 
             return vm;
+            }
+
+        private string _output = "";
+
+        public string Output
+            {
+            get
+                {
+                return _output;
+                }
+            }
+
+        public void OutputReceived(string line)
+            {
+            _output = line;
+
+            OnPropertyChanged(nameof(Output));
             }
         }
 
@@ -50,8 +69,10 @@ namespace Builder
 
     public class HistoryEventVM : ViewModelBase
         {
-        public HistoryEventVM ()
+        public HistoryVM Parent { get; private set; }
+        public HistoryEventVM (HistoryVM parent)
             {
+            Parent = parent;
             WireupCommands();
             }
 

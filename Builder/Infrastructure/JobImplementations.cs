@@ -29,7 +29,7 @@ namespace Builder
                 throw new InvalidOperationException("Could not create new history event");
 
             vm.InitializeWith(configurationVM);
-            if(part == null)
+            if (part == null)
                 vm.Command = "bb b";
             else
                 {
@@ -63,43 +63,29 @@ namespace Builder
         private static void ProcessBuildOutput (JobContext<BuildInfo> context, ShellOutput o)
             {
             string l = o.Data;
-            if (l.StartsWith("Starting part"))
-                {
-                if (context.Information.PartCount < 0)
-                    {
-                    var match = Regex.Match(l, @"^Starting\spart\s\(\d+\/(?<PartCount>\d+)\)");
-                    int count;
-                    if (match.Success && int.TryParse(match.Groups["PartCount"].Value, out count) && count > 0)
-                        {
-                        context.Information.PartCount = count;
-                        context.Progress.ShortStatus = count.ToString();
-                        }
-                    }
-
-                return;
-                }
 
             if (l.StartsWith("Running parts"))
                 {
-                if (context.Information.PartCount <= 0)
-                    return;
-
                 var match = Regex.Match(l, @"^Running\sparts\s\((?<PartCount>\d+)\sremain");
                 int count;
                 if (match.Success && int.TryParse(match.Groups["PartCount"].Value, out count) && count > 0)
                     {
+                    if (context.Information.PartCount <= count)
+                        context.Information.PartCount = count;
+
                     var percent = 1.0 - ((double)count / context.Information.PartCount);
                     context.Progress.Value = (int)(percent * 100);
                     context.Progress.ShortStatus = count.ToString();
+                    return;
                     }
-
-                return;
                 }
 
             lock (context.Log)
                 {
                 context.Log.WriteLine(l);
                 }
+
+            context?.HistoryVM?.Parent?.OutputReceived(l);
             }
 
         internal static OperationResult Clean (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
@@ -118,7 +104,7 @@ namespace Builder
                 var prefix = BuildPrefix(part);
                 vm.Command = $"bb {prefix} re {part?.Name} -c";
                 }
-                        
+
             vm.JobName = "Clean";
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
             return Execute(context, (c, o) => c.Log.WriteLine(o.Data));
@@ -140,7 +126,7 @@ namespace Builder
                 var prefix = BuildPrefix(part);
                 vm.Command = $"bb {prefix} re {part?.Name}";
                 }
-            
+
             vm.JobName = "Rebuild";
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
             return Execute(context, ProcessBuildOutput);
@@ -241,9 +227,9 @@ namespace Builder
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            try
+            using (context)
                 {
-                using (context)
+                try
                     {
                     context.Log.WriteLine($"Logfile for Job {context.HistoryVM.JobName}, ID {context.HistoryVM.ID}, Started: {DateTime.Now.ToLongDateString()} {DateTime.Now.ToLongTimeString()}");
                     context.CancellationToken.Register(() => context.Shell.Dispose(true));
@@ -255,17 +241,17 @@ namespace Builder
                     context.HistoryVM.Update(context.DbConnection, result == OperationResult.Success ? HistoryEventResult.Success : HistoryEventResult.Failed, stopwatch.Elapsed.TotalSeconds);
                     return result;
                     }
-                }
-            catch (Exception e)
-                {
-                if (context.CancellationToken.IsCancellationRequested)
+                catch (Exception e)
                     {
-                    context.HistoryVM.Update(context.DbConnection, HistoryEventResult.Cancelled, stopwatch.Elapsed.TotalSeconds);
-                    return OperationResult.Aborted;
-                    }
+                    if (context.CancellationToken.IsCancellationRequested)
+                        {
+                        context.HistoryVM.Update(context.DbConnection, HistoryEventResult.Cancelled, stopwatch.Elapsed.TotalSeconds);
+                        return OperationResult.Aborted;
+                        }
 
-                log.ErrorFormat("Exception during command {0}:{1}", context.HistoryVM.Command, e.Message);
-                throw;
+                    log.ErrorFormat("Exception during command {0}:{1}", context.HistoryVM.Command, e.Message);
+                    throw;
+                    }
                 }
             }
 
