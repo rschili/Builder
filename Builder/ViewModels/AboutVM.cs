@@ -62,7 +62,7 @@ namespace Builder
                         return;
                         }
 
-                    if(version.Major == _version.Major && version.Minor == _version.Minor)
+                    if((version.Major == _version.Major && version.Minor >= _version.Minor) || (version.Major > _version.Major))
                         {
                         UpdateText = "Using the latest version.";
                         return;

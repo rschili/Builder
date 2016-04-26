@@ -80,12 +80,17 @@ namespace Builder
                     }
                 }
 
-            lock (context.Log)
+            WriteOutput(l, context.Log, context?.HistoryVM?.Parent);
+            }
+
+        private static void WriteOutput(string line, StreamWriter writer, HistoryVM vm)
+            {
+            lock (writer)
                 {
-                context.Log.WriteLine(l);
+                writer.WriteLine(line);
                 }
 
-            context?.HistoryVM?.Parent?.OutputReceived(l);
+            vm?.OutputReceived(line);
             }
 
         internal static OperationResult Clean (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
@@ -107,7 +112,7 @@ namespace Builder
 
             vm.JobName = "Clean";
             var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
-            return Execute(context, (c, o) => c.Log.WriteLine(o.Data));
+            return Execute(context, (c, o) => WriteOutput(o.Data, c.Log, c.HistoryVM?.Parent));
             }
 
         internal static OperationResult Rebuild (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
@@ -171,7 +176,7 @@ namespace Builder
                 context.Progress.ShortStatus = context.Information.Counter.ToString();
                 }
 
-            context.Log.WriteLine(o.Data);
+            WriteOutput(line, context.Log, context?.HistoryVM?.Parent);
             }
 
         #region Execution
@@ -239,6 +244,7 @@ namespace Builder
                     var result = context.Shell.ExecuteCommand(context.HistoryVM.Command).Success ? OperationResult.Success : OperationResult.Failed;
                     stopwatch.Stop();
                     context.HistoryVM.Update(context.DbConnection, result == OperationResult.Success ? HistoryEventResult.Success : HistoryEventResult.Failed, stopwatch.Elapsed.TotalSeconds);
+                    WriteOutput($"Operation completed in {stopwatch.Elapsed.ToString()}.", context.Log, context?.HistoryVM?.Parent);
                     return result;
                     }
                 catch (Exception e)
@@ -246,6 +252,7 @@ namespace Builder
                     if (context.CancellationToken.IsCancellationRequested)
                         {
                         context.HistoryVM.Update(context.DbConnection, HistoryEventResult.Cancelled, stopwatch.Elapsed.TotalSeconds);
+                        WriteOutput("Operation cancelled.", context.Log, context?.HistoryVM?.Parent);
                         return OperationResult.Aborted;
                         }
 

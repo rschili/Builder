@@ -7,13 +7,15 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         xmlns:rsc="clr-namespace:RSCoreLib.WPF;assembly=RSCoreLib"
-        Height="250" 
-        Width="750"
+        Height="300" 
+        Width="1280"
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="2"
-        Icon="../Images/vs/console16.png"  ShowIconOnTitleBar="False"
+        Icon="../Images/vs/console16.png"  ShowIconOnTitleBar="False" Loaded="MetroWindow_Loaded" Closed="MetroWindow_Closed"
         Title="Output" ResizeMode="CanResize">
     <Grid>
-        <TextBox Text="{Binding HistoryVM.Output, Mode=OneWay}" />
+        <ScrollViewer Name="ScrollV" ScrollChanged="OnScrollChanged" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Margin="6">
+            <TextBox IsReadOnly="True" TextWrapping="NoWrap" Name="Opfer" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" BorderBrush="{x:Null}" BorderThickness="0"/>
+        </ScrollViewer>
     </Grid>
 </mah:MetroWindow>

@@ -64,9 +64,6 @@ namespace Builder
             CancelCommand.CanExecuteHandler = (_) => OperationIsRunning && _cancellationSource != null;
             CancelCommand.Enabled = true;
 
-            TestCommand.Handler = p => RunOperation(Test, "TEST", p);
-            TestCommand.CanExecuteHandler = (_) => !OperationIsRunning;
-
             AddSourceDirectoryCommand.Handler = AddSourceDirectory;
             }
 
@@ -275,21 +272,6 @@ namespace Builder
                 //rebuild the model tree
                 AppDataManager.SaveEnvironments(SourceDirectories.Select(vm => vm.RegenerateModel()).ToList());
                 }
-            }
-
-        public SimpleCommand TestCommand { get; } = new SimpleCommand();
-        private static async Task<OperationResult> Test (CancellationToken cancellationToken, ProgressViewModel progress, object parameter)
-            {
-            for (int i = 0; i < 10; i++)
-                {
-                cancellationToken.ThrowIfCancellationRequested();
-                progress.Value = i * 10;
-                progress.ShortStatus = i.ToString();
-                await Task.Delay(500);
-                }
-
-            Random success = new Random();
-            return success.Next(0, 10) >= 5 ? OperationResult.Finished : OperationResult.Failed;
             }
 
         public SimpleCommand AddSourceDirectoryCommand { get; } = new SimpleCommand();

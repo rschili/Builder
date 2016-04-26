@@ -33,7 +33,7 @@ namespace Builder
         
         public HistoryEventVM CreateHistoryEvent()
             {
-            _output = "";
+            OutputCleared?.Invoke(this, EventArgs.Empty);
             var vm = new HistoryEventVM(this);
             lock (Entries)
                 Entries.Insert(0, vm);
@@ -41,21 +41,12 @@ namespace Builder
             return vm;
             }
 
-        private string _output = "";
-
-        public string Output
-            {
-            get
-                {
-                return _output;
-                }
-            }
+        public event EventHandler<string> Output;
+        public event EventHandler OutputCleared;
 
         public void OutputReceived(string line)
             {
-            _output = line;
-
-            OnPropertyChanged(nameof(Output));
+            Output?.Invoke(this, line);
             }
         }
 
