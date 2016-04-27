@@ -5,14 +5,21 @@ Introduction
 ------------
 
 I mostly wrote this for myself both as a programming practice and as a tool that I will use myself on a daily basis.
-For people not working for my company, this tool will be pretty pointless, but you can still have a look.
-
-You will not find a lot of comments or tests for this thing, but I try to keep the general code quality high. WPF developers know that there are always many solutions to a given problem, and I'm looking as long as it takes to find one that feels right. Which is harder than it sounds. I am constantly refactoring this code and try to use the approaches that seem best to me.
-
-**This Application requires .NET Framework 4.6.1 to run.** You can download it [here](https://www.microsoft.com/en-us/download/details.aspx?id=49981) for Windows 7 and later.
+For people not working for my company, this tool will be pretty pointless, but you can still have a look at the code.
 
 ![Picture of Main Window](Builder/doc/main.png)
 [![Demo Video](https://j.gifs.com/OYXAwp.gif)](https://youtu.be/bxuDoglKJyU)
+
+Requirements
+------------
+
+**This Application requires .NET Framework 4.6.1 to run.** You can download it [here](https://www.microsoft.com/en-us/download/details.aspx?id=49981) for Windows 7 and later.
+
+**The Application requires administrator privileges to run** See [FAQ](Builder/doc/Readme.md#faq) for details. Basically, it's required for creating symbolic links during the builds.
+
+When you launch this App **for the first time**, Windows does everything in its power to prevent you from doing so. SmartScreen will warn you because it does not recognize the App. I'm afraid there is not much I can do about that. It will go away once enough unique machines ran the App, which might never happen :-)
+
+![Windows being protective](Builder/doc/smartscreen.png)
 
 Dependencies
 ------------

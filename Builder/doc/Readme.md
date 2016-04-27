@@ -47,6 +47,12 @@ There is two ways to make this work, I decided to just always run this applicati
 
 If your build fails due to failing permissions to create symbolic links, it will show **A required privilege is not held by the client.**
 
+### SmartScreen
+
+When you launch this App **for the first time**, Windows does everything in its power to prevent you from doing so. SmartScreen will warn you because it does not recognize the App. I'm afraid there is not much I can do about that. It will go away once enough unique machines ran the App, which might never happen :-)
+
+![Windows being protective](smartscreen.png)
+
 Version History
 ---------------
 
@@ -60,11 +66,19 @@ Version History
 
 -   Extract **Warnings and Errors** for each build, write to DB
 -   Visual Studio-like **Error List** Window
--   Visual Studio-like **Output** Window
 
 ### Changelog
 
-**1.0 Initial Release Latest additions**
+#### 1.2
+
+-   Visual Studio-like **Output** Window
+-   Fixed progress display on bb 2.7
+
+#### 1.1
+
+-   **Improved Part Browser** It can now handle some rare constructs, and does not abort on the first encountered issue
+
+#### 1.0 Initial Release Latest additions
 
 -   **Part Browser**, allow pinning specific parts below a configuration node in the tree so only that part may be build
 -   **History** Window displaying Jobs of current session, jump to logfile by double-clicking a row
