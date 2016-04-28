@@ -276,7 +276,16 @@ namespace Builder
             result.DefaultPartOptions = list.Select(s => s.DefaultPartOptions).FirstOrDefault(dpo => dpo != null);
             result.DefaultTarget = list.Select(s => s.DefaultTarget).FirstOrDefault(dt => dt != null);
             var partStrategies = list.SelectMany(s => s.PartStrategies);
-            result.PartStrategies.AddRange(partStrategies);
+            foreach(var ps in partStrategies)
+                {
+                if (ps.PartFile?.Equals("$(strategy.defaultPartFile)", StringComparison.OrdinalIgnoreCase) == true)
+                    ps.PartFile = result.DefaultTarget?.PartFile;
+
+                if (string.IsNullOrEmpty(ps.PartFile))
+                    continue;
+
+                result.PartStrategies.Add(ps);
+                }
 
             var localRepositories = list.SelectMany(s => s.LocalRepositories).Where(l => !string.IsNullOrEmpty(l.Directory));
             var dict = result.LocalRepositories;
