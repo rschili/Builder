@@ -13,7 +13,7 @@ namespace Builder
     public class HistoryVM : ViewModelBase
         {
         private static readonly ILog log = LogManager.GetLogger(typeof(HistoryVM));
-        private readonly MainVM Parent;
+        public MainVM Parent { get; }
 
         public ObservableCollection<HistoryEventVM> Entries { get; } = new ObservableCollection<HistoryEventVM>();
 
@@ -33,20 +33,11 @@ namespace Builder
         
         public HistoryEventVM CreateHistoryEvent()
             {
-            OutputCleared?.Invoke(this, EventArgs.Empty);
             var vm = new HistoryEventVM(this);
             lock (Entries)
                 Entries.Insert(0, vm);
 
             return vm;
-            }
-
-        public event EventHandler<string> Output;
-        public event EventHandler OutputCleared;
-
-        public void OutputReceived(string line)
-            {
-            Output?.Invoke(this, line);
             }
         }
 

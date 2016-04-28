@@ -12,10 +12,10 @@
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="2"
         Icon="../Images/vs/console16.png"  ShowIconOnTitleBar="False" Loaded="MetroWindow_Loaded" Closed="MetroWindow_Closed"
-        Title="Output" ResizeMode="CanResize">
+        Title="Output" ResizeMode="CanResize" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" >
     <Grid>
         <ScrollViewer Name="ScrollV" ScrollChanged="OnScrollChanged" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Margin="6">
-            <TextBox IsReadOnly="True" TextWrapping="NoWrap" Name="Opfer" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" BorderBrush="{x:Null}" BorderThickness="0"/>
+            <TextBox IsReadOnly="True" TextWrapping="NoWrap" Name="Opfer" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" BorderBrush="{x:Null}" BorderThickness="0" FontSize="10"/>
         </ScrollViewer>
     </Grid>
 </mah:MetroWindow>

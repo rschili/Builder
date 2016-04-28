@@ -20,11 +20,13 @@ namespace Builder
         public ObservableCollection<SourceDirectoryVM> SourceDirectories { get; } = new ObservableCollection<SourceDirectoryVM>();
         private static readonly ILog log = LogManager.GetLogger(typeof(MainVM));
         public HistoryVM HistoryVM { get; }
+        public OutputVM OutputVM { get; }
 
         public MainVM (SettingsVM settings, ICollection<SourceDirectory> sourceDirectories)
             {
             Guard.NotNull(settings);
             HistoryVM = new HistoryVM(this);
+            OutputVM = new OutputVM(this);
             SettingsVM = settings;
             WireupCommands();
 
@@ -141,7 +143,7 @@ namespace Builder
                     }
 
                 window = new OutputWindow();
-                window.DataContext = this;
+                window.DataContext = OutputVM;
                 var mainWindow = Application.Current.MainWindow;
                 if (mainWindow != null)
                     {

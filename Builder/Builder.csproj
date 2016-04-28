@@ -107,6 +107,7 @@
     <Compile Include="Infrastructure\ShellHelper.cs" />
     <Compile Include="Infrastructure\SourceDirectory.cs" />
     <Compile Include="Infrastructure\Settings.cs" />
+    <Compile Include="ViewModels\OutputVM.cs" />
     <Compile Include="ViewModels\PartExplorerVM.cs" />
     <Compile Include="ViewModels\HistoryVM.cs" />
     <Compile Include="ViewModels\AboutVM.cs" />

@@ -69,6 +69,12 @@ Version History
 
 ### Changelog
 
+#### 1.3
+
+-   Improved **Output** Window now buffers text in background
+-   Move Up/Down disabled when not possible
+-   Emerald Theme
+
 #### 1.2
 
 -   Visual Studio-like **Output** Window

@@ -203,7 +203,9 @@ namespace Builder
             DeleteCommand.CanExecuteHandler = canExecuteHandler;
 
             MoveUpCommand.Handler = MoveUp;
+            MoveUpCommand.CanExecuteHandler = CanMoveUp;
             MoveDownCommand.Handler = MoveDown;
+            MoveDownCommand.CanExecuteHandler = CanMoveDown;
 
             NavigateToCommand.Handler = NavigateTo;
 
@@ -212,7 +214,6 @@ namespace Builder
 
             AddConfigurationCommand.Handler = AddConfiguration;
             }
-
 
         public SimpleCommand AddConfigurationCommand { get; } = new SimpleCommand();
         private void AddConfiguration (object obj)
@@ -294,6 +295,16 @@ namespace Builder
             }
 
         public SimpleCommand MoveUpCommand { get; } = new SimpleCommand();
+        private bool? CanMoveUp (object arg)
+            {
+            var collection = Parent.SourceDirectories;
+            lock (collection)
+                {
+                var index = collection.IndexOf(this);
+                return index > 0;
+                }
+            }
+
         private void MoveUp (object parameter)
             {
             var collection = Parent.SourceDirectories;
@@ -312,6 +323,15 @@ namespace Builder
             }
 
         public SimpleCommand MoveDownCommand { get; } = new SimpleCommand();
+        private bool? CanMoveDown (object arg)
+            {
+            var collection = Parent.SourceDirectories;
+            lock (collection)
+                {
+                var index = collection.IndexOf(this);
+                return index < collection.Count - 1;
+                }
+            }
         private void MoveDown (object parameter)
             {
             var collection = Parent.SourceDirectories;

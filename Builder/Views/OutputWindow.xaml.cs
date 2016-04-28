@@ -20,12 +20,18 @@ namespace Builder
         private void MetroWindow_Loaded (object sender, RoutedEventArgs e)
             {
             _active = true;
-            var vm = (DataContext as MainVM)?.HistoryVM;
+            var vm = DataContext as OutputVM;
             if (vm == null)
                 return;
 
-            vm.Output += OutputReceived;
-            vm.OutputCleared += OutputCleared;
+            lock (vm)
+                {
+                Opfer.AppendText(vm.GetCurrentBufferedOutput());
+                vm.OutputReceived += OutputReceived;
+                vm.OutputCleared += OutputCleared;
+                ScrollV.ScrollToEnd();
+                _isAtEnd = true;
+                }
             }
 
         private void OutputCleared (object sender, EventArgs e)
@@ -70,11 +76,11 @@ namespace Builder
             {
             _active = false;
 
-            var vm = (DataContext as MainVM)?.HistoryVM;
+            var vm = DataContext as OutputVM;
             if (vm == null)
                 return;
 
-            vm.Output -= OutputReceived;
+            vm.OutputReceived -= OutputReceived;
             vm.OutputCleared -= OutputCleared;
             }
         }

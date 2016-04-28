@@ -15,6 +15,7 @@ namespace Builder
         Alpha,
         Version0_9,
         Version1_0,
+        Version1_3,
         Latest
         }
 
@@ -60,9 +61,15 @@ namespace Builder
                     break;
 
                 case Theme.Version1_0:
-                case Theme.Latest:
                     ThemeManager.ChangeAppStyle(Application.Current,
                                     ThemeManager.GetAccent("Olive"),
+                                    ThemeManager.GetAppTheme("BaseLight"));
+                    break;
+
+                case Theme.Version1_3:
+                case Theme.Latest:
+                    ThemeManager.ChangeAppStyle(Application.Current,
+                                    ThemeManager.GetAccent("Emerald"),
                                     ThemeManager.GetAppTheme("BaseLight"));
                     break;
                 }
@@ -86,8 +93,11 @@ namespace Builder
             if (t == Theme.Version0_9)
                 return new SolidColorBrush(Color.FromRgb(164,196,0));
 
-            if (t == Theme.Version1_0 || t == Theme.Latest)
+            if (t == Theme.Version1_0)
                 return new SolidColorBrush(Color.FromRgb(109, 135, 100));
+
+            if (t == Theme.Version1_3 || t == Theme.Latest)
+                return new SolidColorBrush(Color.FromRgb(0, 138, 0));
 
             return Brushes.Transparent;
             }
@@ -117,6 +127,9 @@ namespace Builder
 
             if (t == Theme.Version1_0)
                 return "Version 1.0 (Olive Light)";
+
+            if (t == Theme.Version1_3)
+                return "Version 1.3 (Emerald Light)";
 
             return "Latest";
             }

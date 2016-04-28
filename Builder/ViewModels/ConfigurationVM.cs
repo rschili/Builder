@@ -243,8 +243,12 @@ namespace Builder
 
             DeleteCommand.Handler = Delete;
             OpenShellCommand.Handler = OpenShell;
+
             MoveUpCommand.Handler = MoveUp;
+            MoveUpCommand.CanExecuteHandler = CanMoveUp;
             MoveDownCommand.Handler = MoveDown;
+            MoveDownCommand.CanExecuteHandler = CanMoveDown;
+
             NavigateToCommand.Handler = NavigateTo;
             ExplorePartsCommand.Handler = ExploreParts;
             AddPartCommand.Handler = AddPart;
@@ -391,6 +395,16 @@ namespace Builder
             }
 
         public SimpleCommand MoveUpCommand { get; } = new SimpleCommand();
+        private bool? CanMoveUp (object arg)
+            {
+            var collection = Parent.Configurations;
+            lock (collection)
+                {
+                var index = collection.IndexOf(this);
+                return index > 0;
+                }
+            }
+
         private void MoveUp (object parameter)
             {
             var collection = Parent.Configurations;
@@ -409,6 +423,16 @@ namespace Builder
             }
 
         public SimpleCommand MoveDownCommand { get; } = new SimpleCommand();
+        private bool? CanMoveDown (object arg)
+            {
+            var collection = Parent.Configurations;
+            lock (collection)
+                {
+                var index = collection.IndexOf(this);
+                return index < collection.Count - 1;
+                }
+            }
+
         private void MoveDown (object parameter)
             {
             var collection = Parent.Configurations;

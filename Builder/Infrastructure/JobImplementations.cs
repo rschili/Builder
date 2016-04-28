@@ -24,7 +24,8 @@ namespace Builder
         internal static OperationResult Build (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
             {
             var shell = configurationVM.SetupEnv();
-            var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
+            var mainVM = configurationVM?.Parent?.Parent;
+            var vm = mainVM?.HistoryVM?.CreateHistoryEvent();
             if (vm == null)
                 throw new InvalidOperationException("Could not create new history event");
 
@@ -39,7 +40,7 @@ namespace Builder
                 }
 
             vm.JobName = "Build";
-            var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
+            var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm, mainVM.OutputVM);
             return Execute(context, ProcessBuildOutput);
             }
 
@@ -80,23 +81,14 @@ namespace Builder
                     }
                 }
 
-            WriteOutput(l, context.Log, context?.HistoryVM?.Parent);
+            context.OutputVM.SendOutput(l);
             }
-
-        private static void WriteOutput(string line, StreamWriter writer, HistoryVM vm)
-            {
-            lock (writer)
-                {
-                writer.WriteLine(line);
-                }
-
-            vm?.OutputReceived(line);
-            }
-
+        
         internal static OperationResult Clean (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
             {
             var shell = configurationVM.SetupEnv();
-            var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
+            var mainVM = configurationVM?.Parent?.Parent;
+            var vm = mainVM?.HistoryVM?.CreateHistoryEvent();
             if (vm == null)
                 throw new InvalidOperationException("Could not create new history event");
 
@@ -111,14 +103,15 @@ namespace Builder
                 }
 
             vm.JobName = "Clean";
-            var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
-            return Execute(context, (c, o) => WriteOutput(o.Data, c.Log, c.HistoryVM?.Parent));
+            var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm, mainVM.OutputVM);
+            return Execute(context, (c, o) => c.OutputVM.SendOutput(o.Data));
             }
 
         internal static OperationResult Rebuild (CancellationToken cancellationToken, ProgressViewModel progress, ConfigurationVM configurationVM, PinnedPart part = null)
             {
             var shell = configurationVM.SetupEnv();
-            var vm = configurationVM?.Parent?.Parent?.HistoryVM?.CreateHistoryEvent();
+            var mainVM = configurationVM?.Parent?.Parent;
+            var vm = mainVM?.HistoryVM?.CreateHistoryEvent();
             if (vm == null)
                 throw new InvalidOperationException("Could not create new history event");
 
@@ -133,7 +126,7 @@ namespace Builder
                 }
 
             vm.JobName = "Rebuild";
-            var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm);
+            var context = new JobContext<BuildInfo>(shell, cancellationToken, progress, vm, mainVM.OutputVM);
             return Execute(context, ProcessBuildOutput);
             }
 
@@ -154,7 +147,7 @@ namespace Builder
             vm.Stream = stream;
             vm.SrcDir = path;
 
-            var context = new JobContext<BootstrapInfo>(shell, cancellationToken, progress, vm);
+            var context = new JobContext<BootstrapInfo>(shell, cancellationToken, progress, vm, history?.Parent?.OutputVM);
             return Execute(context, ProcessBootstrapOutput);
             }
 
@@ -176,24 +169,25 @@ namespace Builder
                 context.Progress.ShortStatus = context.Information.Counter.ToString();
                 }
 
-            WriteOutput(line, context.Log, context?.HistoryVM?.Parent);
+            context.OutputVM.SendOutput(line);
             }
 
         #region Execution
         internal class JobContext<T> : IDisposable where T : new()
             {
-            internal StreamWriter Log { get; }
             internal SQLiteConnection DbConnection { get; }
             internal ProgressViewModel Progress { get; }
             internal CancellationToken CancellationToken { get; }
             internal T Information { get; }
             internal HistoryEventVM HistoryVM { get; }
+            internal OutputVM OutputVM { get; }
             internal CommandLineSandbox Shell { get; }
 
-            internal JobContext (CommandLineSandbox shell, CancellationToken cancellationToken, ProgressViewModel progress, HistoryEventVM eventVM)
+            internal JobContext (CommandLineSandbox shell, CancellationToken cancellationToken, ProgressViewModel progress, HistoryEventVM eventVM, OutputVM output)
                 {
                 Shell = shell;
                 Progress = progress;
+                OutputVM = output;
                 CancellationToken = cancellationToken;
                 Information = new T();
                 DbConnection = AppDataManager.ConnectToSqlite();
@@ -206,11 +200,8 @@ namespace Builder
                         throw new InvalidOperationException("No ID obtained for Job from DB.");
 
                     string logPath = AppDataManager.GetLogFilePath(HistoryVM.ID.Value);
-                    var dir = Path.GetDirectoryName(logPath);
-                    if (!Directory.Exists(dir))
-                        Directory.CreateDirectory(dir);
-
-                    Log = new StreamWriter(logPath, false);
+                    output.Cls();
+                    output.StartWritingLog(logPath);
                     }
                 catch (Exception e)
                     {
@@ -222,7 +213,7 @@ namespace Builder
 
             public void Dispose ()
                 {
-                Log.Dispose();
+                OutputVM.EndWritingLog();
                 DbConnection.Dispose();
                 }
             }
@@ -236,7 +227,7 @@ namespace Builder
                 {
                 try
                     {
-                    context.Log.WriteLine($"Logfile for Job {context.HistoryVM.JobName}, ID {context.HistoryVM.ID}, Started: {DateTime.Now.ToLongDateString()} {DateTime.Now.ToLongTimeString()}");
+                    context.OutputVM.SendOutput($"Logfile for Job {context.HistoryVM.JobName}, ID {context.HistoryVM.ID}, Started: {DateTime.Now.ToLongDateString()} {DateTime.Now.ToLongTimeString()}");
                     context.CancellationToken.Register(() => context.Shell.Dispose(true));
                     context.CancellationToken.ThrowIfCancellationRequested();
                     context.Shell.ExecuteCommand(SET_UNBUFFERED_COMMAND);
@@ -244,7 +235,7 @@ namespace Builder
                     var result = context.Shell.ExecuteCommand(context.HistoryVM.Command).Success ? OperationResult.Success : OperationResult.Failed;
                     stopwatch.Stop();
                     context.HistoryVM.Update(context.DbConnection, result == OperationResult.Success ? HistoryEventResult.Success : HistoryEventResult.Failed, stopwatch.Elapsed.TotalSeconds);
-                    WriteOutput($"Operation completed in {stopwatch.Elapsed.ToString()}.", context.Log, context?.HistoryVM?.Parent);
+                    context.OutputVM.SendOutput($"Operation completed in {stopwatch.Elapsed.ToString(@"d\.hh\:mm\:ss")}.");
                     return result;
                     }
                 catch (Exception e)
@@ -252,7 +243,7 @@ namespace Builder
                     if (context.CancellationToken.IsCancellationRequested)
                         {
                         context.HistoryVM.Update(context.DbConnection, HistoryEventResult.Cancelled, stopwatch.Elapsed.TotalSeconds);
-                        WriteOutput("Operation cancelled.", context.Log, context?.HistoryVM?.Parent);
+                        context.OutputVM.SendOutput("Operation cancelled.");
                         return OperationResult.Aborted;
                         }
 

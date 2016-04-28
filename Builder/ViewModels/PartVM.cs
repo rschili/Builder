@@ -147,8 +147,12 @@ namespace Builder
         private void WireupCommands ()
             {
             UnpinCommand.Handler = Unpin;
+
             MoveUpCommand.Handler = MoveUp;
+            MoveUpCommand.CanExecuteHandler = CanMoveUp;
             MoveDownCommand.Handler = MoveDown;
+            MoveDownCommand.CanExecuteHandler = CanMoveDown;
+
             BuildCommand.Handler = Build;
             BuildCommand.CanExecuteHandler = p => Parent?.BuildCommand.CanExecute(p);
 
@@ -179,6 +183,15 @@ namespace Builder
             }
 
         public SimpleCommand MoveUpCommand { get; } = new SimpleCommand();
+        private bool? CanMoveUp (object arg)
+            {
+            var collection = Parent.PinnedParts;
+            lock (collection)
+                {
+                var index = collection.IndexOf(this);
+                return index > 0;
+                }
+            }
         private void MoveUp (object parameter)
             {
             var collection = Parent.PinnedParts;
@@ -197,6 +210,16 @@ namespace Builder
             }
 
         public SimpleCommand MoveDownCommand { get; } = new SimpleCommand();
+        private bool? CanMoveDown (object arg)
+            {
+            var collection = Parent.PinnedParts;
+            lock (collection)
+                {
+                var index = collection.IndexOf(this);
+                return index < collection.Count - 1;
+                }
+            }
+
         private void MoveDown (object parameter)
             {
             var collection = Parent.PinnedParts;
