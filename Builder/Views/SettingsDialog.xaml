@@ -7,7 +7,7 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         xmlns:rsc="clr-namespace:RSCoreLib.WPF;assembly=RSCoreLib"
-        Height="610" MinHeight="400"
+        Height="670" MinHeight="400"
         Width="470" MinWidth="400"
         d:DataContext="{d:DesignInstance Type=local:SettingsVM, IsDesignTimeCreatable=True}"
         BorderBrush="{DynamicResource AccentColorBrush}"
@@ -37,10 +37,10 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <!-- 0 -->
+                    <!-- ^0 -->
                     <RowDefinition Height="6" />
                     <RowDefinition Height="Auto" />
-                    <!-- 2 -->
+                    <!-- ^2 -->
                     <RowDefinition Height="18" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="18" />
@@ -49,13 +49,17 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="12" />
                     <RowDefinition Height="Auto" />
-                    <!-- 10 -->
+                    <!-- ^10 -->
+                    <RowDefinition Height="6" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="6" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="12" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="28" />
                     <RowDefinition Height="Auto" />
-                    <!-- 15 -->
+                    <!-- ^17 -->
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
@@ -98,12 +102,19 @@
                 <TextBlock Grid.Row="8"  Text="TCC Path" Style="{StaticResource Caption}" />
                 <TextBox Grid.Row="8" Grid.Column="2" HorizontalAlignment="Stretch" MinWidth="150" Text="{Binding TCCLePath}" IsEnabled="{Binding TCCLePathEnabled}" ToolTip="Full path the the tcc.exe executable." />
 
-                <TextBlock Grid.Row="12"  Text="Global Shell Commands" Style="{StaticResource Caption}" />
-                <TextBox Grid.Row="13" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" MinWidth="150" Text="{Binding ShellCommands}"
+                <TextBlock Grid.Row="10"  Text="Show Output when build starts" Style="{StaticResource Caption}" />
+                <mah:ToggleSwitch Grid.Row="10" Grid.Column="2" OnLabel="Yes" OffLabel="No" IsChecked="{Binding ShowOutputOnBuild}" HorizontalAlignment="Right" FontFamily="{DynamicResource {x:Static SystemFonts.CaptionFontFamilyKey}}" />
+                <TextBlock Grid.Row="12"  Text="Show Output after failure" Style="{StaticResource Caption}" />
+                <mah:ToggleSwitch Grid.Row="12" Grid.Column="2" OnLabel="Yes" OffLabel="No" IsChecked="{Binding ShowOutputAfterFailure}" HorizontalAlignment="Right" FontFamily="{DynamicResource {x:Static SystemFonts.CaptionFontFamilyKey}}" />
+                <TextBlock Grid.Row="14"  Text="Save Buildlogs" Style="{StaticResource Caption}" />
+                <mah:ToggleSwitch Grid.Row="14" Grid.Column="2" OnLabel="Yes" OffLabel="No" IsChecked="{Binding Buildlogs}" HorizontalAlignment="Right" FontFamily="{DynamicResource {x:Static SystemFonts.CaptionFontFamilyKey}}" />
+
+                <TextBlock Grid.Row="16"  Text="Global Shell Commands" Style="{StaticResource Caption}" />
+                <TextBox Grid.Row="17" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" MinWidth="150" Text="{Binding ShellCommands}"
                  HorizontalScrollBarVisibility="Auto" mah:TextBoxHelper.Watermark="Commands to run on every shell." VerticalScrollBarVisibility="Visible" Height="120" AcceptsReturn="True" />
 
-                <TextBlock Grid.Row="15" Text="Internal Functions" Style="{StaticResource Caption}" />
-                <WrapPanel Grid.Row="16" Grid.ColumnSpan="3" Margin="0,0,5,0" HorizontalAlignment="Right">
+                <TextBlock Grid.Row="18" Text="Internal Functions" Style="{StaticResource Caption}" />
+                <WrapPanel Grid.Row="19" Grid.ColumnSpan="3" Margin="0,0,5,0" HorizontalAlignment="Right">
                     <Button Margin="6" Command="{StaticResource NullCommand}">Purge DB</Button>
                     <Button Margin="6" Click="BrowseAppData_Click">AppData</Button>
                 </WrapPanel>

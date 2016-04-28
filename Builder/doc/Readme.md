@@ -61,11 +61,6 @@ Version History
 **Short term**
 
 -   Search in Part Browser, using wildcards
--   New Options:
-    -   Show Output Window when a Build Starts
-    -   Show Output Window after Failed Build
-    -   Enable/Disable Build Logging (currently it is always on)
--   Investigate PartStrategy Priority. It appears the evaluation needs to be reversed
 
 **Long term**
 
@@ -79,6 +74,11 @@ Version History
 -   Improved **Output** Window now buffers text in background
 -   Move Up/Down disabled when not possible
 -   Emerald Theme
+-   PartFile Explorer revisited, it now resolves PartStrategies better
+-   New Options:
+    -   Show Output Window when a Build Starts
+    -   Show Output Window after Failed Build
+    -   Enable/Disable Build Logging (currently it is always on)
 
 #### 1.2
 

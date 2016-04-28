@@ -29,7 +29,6 @@ namespace Builder
             Model.ShellCommands = "set myvar=something";
             }
 
-
         public bool CloseToTray
             {
             get
@@ -150,6 +149,48 @@ namespace Builder
             set
                 {
                 Model.ShellCommands = value;
+                IsDirty = true;
+                OnPropertyChanged();
+                }
+            }
+
+        public bool ShowOutputOnBuild
+            {
+            get
+                {
+                return Model.ShowOutputOnBuild;
+                }
+            set
+                {
+                Model.ShowOutputOnBuild = value;
+                IsDirty = true;
+                OnPropertyChanged();
+                }
+            }
+
+        public bool ShowOutputAfterFailure
+            {
+            get
+                {
+                return Model.ShowOutputAfterFailure;
+                }
+            set
+                {
+                Model.ShowOutputAfterFailure = value;
+                IsDirty = true;
+                OnPropertyChanged();
+                }
+            }
+
+        public bool Buildlogs
+            {
+            get
+                {
+                return Model.Buildlogs;
+                }
+            set
+                {
+                Model.Buildlogs = value;
                 IsDirty = true;
                 OnPropertyChanged();
                 }

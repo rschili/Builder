@@ -13,7 +13,7 @@ namespace Builder
     public class OutputVM : ViewModelBase
         {
         private static readonly ILog log = LogManager.GetLogger(typeof(OutputVM));
-        private readonly MainVM Parent;
+        public readonly MainVM Parent;
         private StreamWriter _logWriter = null;
         public event EventHandler<string> OutputReceived;
         public event EventHandler OutputCleared;
@@ -56,6 +56,9 @@ namespace Builder
             {
             try
                 {
+                if (Parent?.SettingsVM?.Buildlogs != true)
+                    return;
+
                 lock (this)
                     {
                     EndWritingLog();
@@ -96,11 +99,16 @@ namespace Builder
 
         public void Cls()
             {
-            lock(this)
+            lock (this)
                 {
                 EndWritingLog();
                 _outputCache.Clear();
                 OutputCleared?.Invoke(this, EventArgs.Empty);
+                }
+
+            if (Parent?.SettingsVM?.ShowOutputOnBuild == true)
+                {
+                Parent?.ShowOutputCommand.Execute(this);
                 }
             }
         }

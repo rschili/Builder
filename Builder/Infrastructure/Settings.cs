@@ -26,6 +26,15 @@ namespace Builder
         [JsonProperty("shellCommands")]
         public string ShellCommands { get; set; }
 
+        [JsonProperty("show_output_on_build")]
+        public bool ShowOutputOnBuild { get; set; } = true;
+
+        [JsonProperty("show_output_after_failure")]
+        public bool ShowOutputAfterFailure { get; set; } = false;
+
+        [JsonProperty("buildlogs")]
+        public bool Buildlogs { get; set; } = true;
+
         public Settings Copy()
             {
             return new Settings()
@@ -35,7 +44,10 @@ namespace Builder
                 Theme = Theme,
                 TCCLeUsage = TCCLeUsage,
                 ShellCommands = ShellCommands,
-                TCCLePath = TCCLePath
+                TCCLePath = TCCLePath,
+                ShowOutputOnBuild = ShowOutputOnBuild,
+                ShowOutputAfterFailure = ShowOutputAfterFailure,
+                Buildlogs = Buildlogs
                 };
             }
         }

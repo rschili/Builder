@@ -26,7 +26,7 @@ namespace Builder
 
         public static string GetLogFilePath(long id)
             {
-            return GetAppDataPath(Path.Combine("logs", StringEncoder.ToString(id, StringEncoder.BASE36CHARS) + ".txt"));
+            return GetAppDataPath(Path.Combine("logs", id.ToString() + ".txt"));
             }
 
         public static void SaveAppDataFile (string fileName, string content)

@@ -236,6 +236,8 @@ namespace Builder
                     stopwatch.Stop();
                     context.HistoryVM.Update(context.DbConnection, result == OperationResult.Success ? HistoryEventResult.Success : HistoryEventResult.Failed, stopwatch.Elapsed.TotalSeconds);
                     context.OutputVM.SendOutput($"Operation completed in {stopwatch.Elapsed.ToString(@"d\.hh\:mm\:ss")}.");
+                    if (result == OperationResult.Failed && context?.OutputVM?.Parent?.SettingsVM?.ShowOutputAfterFailure == true)
+                        context?.OutputVM?.Parent?.ShowOutputCommand?.Execute(context);
                     return result;
                     }
                 catch (Exception e)

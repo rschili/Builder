@@ -21,10 +21,12 @@ namespace Builder
         private static readonly ILog log = LogManager.GetLogger(typeof(MainVM));
         public HistoryVM HistoryVM { get; }
         public OutputVM OutputVM { get; }
+        private TaskScheduler _ts = null;
 
         public MainVM (SettingsVM settings, ICollection<SourceDirectory> sourceDirectories)
             {
             Guard.NotNull(settings);
+            _ts = TaskScheduler.FromCurrentSynchronizationContext();
             HistoryVM = new HistoryVM(this);
             OutputVM = new OutputVM(this);
             SettingsVM = settings;
@@ -130,6 +132,12 @@ namespace Builder
         public SimpleCommand ShowOutputCommand { get; } = new SimpleCommand();
         private void ShowOutput (object obj)
             {
+            if (TaskScheduler.Current != _ts)
+                {
+                Task.Factory.StartNew(() => ShowOutput(obj), CancellationToken.None, TaskCreationOptions.None, _ts);
+                return;
+                }
+
             lock (this)
                 {
                 OutputWindow window = _outputWindow;

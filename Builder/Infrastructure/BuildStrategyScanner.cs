@@ -27,22 +27,10 @@ namespace Builder
         public List<PartStrategy> PartStrategies { get; } = new List<PartStrategy>();
         public IDictionary<string, LocalRepository> LocalRepositories { get; } = new Dictionary<string, LocalRepository>(StringComparer.OrdinalIgnoreCase);
 
-        //we ignore the repository flag as PartStrategies are only keyed on part file name.
-        internal BuildFromSource GetBuildFromSource (string partFile) //, string repository) 
+        internal BuildFromSource GetBuildFromSource (string partFile, string partName) //, string repository) 
             {
-            foreach(var ps in PartStrategies)
-                {
-                if (ps.PartName != "*")
-                    continue;//we don't handle names of specific parts, just work on the part file level for now.
-
-                if (ps.PartFile == "*")
-                    return ps.BuildFromSource;
-
-                if (string.Equals(partFile, ps.PartFile, StringComparison.OrdinalIgnoreCase))
-                    return ps.BuildFromSource;
-                }
-
-            return DefaultPartOptions?.BuildFromSource ?? BuildFromSource.Never;
+            return PartStrategies.FirstOrDefault(ps => partFile.Matches(ps.PartFile) && partName.Matches(ps.PartName))
+                ?.BuildFromSource ?? DefaultPartOptions?.BuildFromSource ?? BuildFromSource.Never;
             }
         }
 
@@ -275,7 +263,7 @@ namespace Builder
             var result = new CompiledBuildStrategy();
             result.DefaultPartOptions = list.Select(s => s.DefaultPartOptions).FirstOrDefault(dpo => dpo != null);
             result.DefaultTarget = list.Select(s => s.DefaultTarget).FirstOrDefault(dt => dt != null);
-            var partStrategies = list.SelectMany(s => s.PartStrategies);
+            var partStrategies = list.SelectMany(s => s.PartStrategies.Reverse());
             foreach(var ps in partStrategies)
                 {
                 if (ps.PartFile?.Equals("$(strategy.defaultPartFile)", StringComparison.OrdinalIgnoreCase) == true)
