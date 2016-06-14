@@ -8,18 +8,17 @@ I mostly wrote this for myself both as a programming practice and as a tool that
 For people not working for my company, this tool will be pretty pointless, but you can still have a look at the code.
 
 ![Picture of Main Window](Builder/doc/main.png)
-[![Demo Video](https://j.gifs.com/OYXAwp.gif)](https://youtu.be/bxuDoglKJyU)
 
-Requirements
-------------
+Get and Build instructions
+--------------------------
 
-**This Application requires .NET Framework 4.6.1 to run.** You can download it [here](https://www.microsoft.com/en-us/download/details.aspx?id=49981) for Windows 7 and later.
+To run the application, you can just download the latest binary from ["Releases"](https://github.com/rschili/Builder/releases)
 
-**The Application requires administrator privileges to run** See [FAQ](Builder/doc/Readme.md#faq) for details. Basically, it's required for creating symbolic links during the builds.
+To get and build you need the Builder repository and also the RSCoreLib repository (hyperlink below, it's on the same github account).
+Put the two repositories alongside so they will share the same parent directory.
 
-When you launch this App **for the first time**, Windows does everything in its power to prevent you from doing so. SmartScreen will warn you because it does not recognize the App. I'm afraid there is not much I can do about that. It will go away once enough unique machines ran the App, which might never happen :-)
-
-![Windows being protective](Builder/doc/smartscreen.png)
+Open up the Builder solution file in Visual Studio 2015, restore the referenced nuget packages, and you should be fine to to debug builds.
+Currently, Release builds require a key to sign the assemblies which I did not include in the repository.
 
 Dependencies
 ------------
@@ -38,7 +37,7 @@ External Dependencies
 -   [Fatcow Icon Library](http://www.fatcow.com/free-icons) (Creative Commons Attribution 3.0 License)
 -   [Visual Studio Image Library](https://www.microsoft.com/en-us/download/details.aspx?id=35825) (MSLT)
 
-User documentation
-------------------
+For all additional information, please refer to the user readme file
+--------------------------------------------------------------------
 
-[Documentation](Builder/doc/Readme.md)
+[Readme](Builder/doc/Readme.md)

@@ -12,28 +12,12 @@ There are a few handy source control features baked into the tool, like triggeri
 
 **This Application requires .NET Framework 4.6.1 to run.** You can download it [here](https://www.microsoft.com/en-us/download/details.aspx?id=49981) for Windows 7 and later.
 
-Main Window
------------
+Known issues
+------------
 
-The main window tries to resemble a VisualStudio Solution Explorer as much as possible.
+-   It appears on some machines Builder will fail to start shells or builds with administrator permissions. These will then run into an error when they try to create symbolic links. This never happened on my own machine so far.
 
-![Image of main window](main.png)
-
-It shows a hierarchical tree of the environments of the current machine, the layout is as follows:
-
-    Environments on <Machine>
-    +---<source dir>                 <Stream name>
-        +---<configuration>
-        |   \---<Part>
-        \---<configuration>
-            +---<Part>
-            \---<Part>
-
-A **source dir** is a folder on the machine which contains a bootstrapped stream of source code.
-
-Below you can have multiple **configurations** which define an output folder (multiple might point to the same), a BuildStrategy and a few additional flags. These are the nodes where you can trigger a TMR, Clean the out dir etc.
-
-Below there are currently only parts. WIP.
+-   There is a sporadic behavior where build output messages will hang for a few minutes and be flushed out a while later in an instant. During two months of daily usage this only happened twice on my machine. I did not have a chance to debug into this yet.
 
 FAQ
 ---
