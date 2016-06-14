@@ -12,6 +12,19 @@ There are a few handy source control features baked into the tool, like triggeri
 
 **This Application requires .NET Framework 4.6.1 to run.** You can download it [here](https://www.microsoft.com/en-us/download/details.aspx?id=49981) for Windows 7 and later.
 
+Manual
+------
+
+### Setting up a new build environment
+
+-   Right Click on the Root Node -&gt; Add -&gt; New Source Directory
+-   Specify the Source Directory path, **please include a trailing backslash here** and the stream name, for example platform02-3 or WSG02-5
+-   Press OK. The new directory should appear in the Tree. Right Click and select "Bootstrap"
+-   This will run the bentleybootstrap script on the directory. It will show a primitive progress bar, and will warn you, if the source directory is not empty.
+-   After the bootstrap finished successfully, right click the tree node -&gt; Add -&gt; New Configuration
+-   Specify an output directory (trailing backslash) and the name of your build strategy (without the file extension). Change the "Mode" to debug, if intended.
+-   Press OK. There should be a new Tree node. Double Click it to open your first bb shell. Input "bb p" to run your initial pull of all repositories.
+
 Known issues
 ------------
 
