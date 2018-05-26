@@ -64,6 +64,7 @@
       <HintPath>..\packages\MahApps.Metro.1.2.4.0\lib\net45\MahApps.Metro.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -75,6 +76,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.2.4.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
       <Private>True</Private>
@@ -97,6 +102,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AssemblyExtensions.cs" />
+    <Compile Include="Guard.cs" />
     <Compile Include="Infrastructure\AppDataManager.cs" />
     <Compile Include="Infrastructure\MakeFileScanner.cs" />
     <Compile Include="Infrastructure\PartFileScanner.cs" />
@@ -107,6 +114,15 @@
     <Compile Include="Infrastructure\ShellHelper.cs" />
     <Compile Include="Infrastructure\SourceDirectory.cs" />
     <Compile Include="Infrastructure\Settings.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="OS\ClipboardHelper.cs" />
+    <Compile Include="OS\CommandLineSandbox.cs" />
+    <Compile Include="OS\InstalledSoftwareHelper.cs" />
+    <Compile Include="OS\ProcessExtensions.cs" />
+    <Compile Include="PathHelper.cs" />
+    <Compile Include="StringHelper.cs" />
+    <Compile Include="TaskExtensions.cs" />
+    <Compile Include="UserfriendlyException.cs" />
     <Compile Include="ViewModels\OutputVM.cs" />
     <Compile Include="ViewModels\PartExplorerVM.cs" />
     <Compile Include="ViewModels\HistoryVM.cs" />
@@ -140,6 +156,17 @@
       <DependentUpon>SettingsDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\MainVM.cs" />
+    <Compile Include="WPF\Behaviors.cs" />
+    <Compile Include="WPF\CollectionExtensions.cs" />
+    <Compile Include="WPF\Commands.cs" />
+    <Compile Include="WPF\Converters.cs" />
+    <Compile Include="WPF\DropDownButton.cs" />
+    <Compile Include="WPF\EventToCommandBehaviors.cs" />
+    <Compile Include="WPF\ProgressViewModel.cs" />
+    <Compile Include="WPF\ViewModelBase.cs" />
+    <Compile Include="WPF\WatermarkTextBox.xaml.cs">
+      <DependentUpon>WatermarkTextBox.xaml</DependentUpon>
+    </Compile>
     <Page Include="Views\OutputWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -188,6 +215,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="WPF\WatermarkTextBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -209,12 +240,6 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\RSCoreLib\RSCoreLib\RSCoreLib.csproj">
-      <Project>{361d18f7-66ca-423f-8124-b549cecf203a}</Project>
-      <Name>RSCoreLib</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\app.ico" />

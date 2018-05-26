@@ -6,7 +6,7 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:local="clr-namespace:Builder"
-        xmlns:rsc="clr-namespace:RSCoreLib.WPF;assembly=RSCoreLib"
+        xmlns:rsc="clr-namespace:RSCoreLib.WPF"
         xmlns:s="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainVM, IsDesignTimeCreatable=True}"

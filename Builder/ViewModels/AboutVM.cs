@@ -14,7 +14,7 @@ namespace Builder
         {
         private static readonly ILog log = LogManager.GetLogger(typeof(AboutVM));
 
-        private readonly Version _version = typeof(AboutVM).Assembly.GetName().Version;
+        private readonly Version _currentVersion = typeof(AboutVM).Assembly.GetName().Version;
         public AboutVM ()
             {
             OpenLatestReleaseCommand.Handler = OpenLatestRelease;
@@ -55,21 +55,21 @@ namespace Builder
                         }
 
                     var match = Regex.Match(name, @"^v(?<version>\d+\.\d+)-\w*$");
-                    Version version;
-                    if (!match.Success || !Version.TryParse(match.Groups["version"].Value, out version))
+                    Version availableVersion;
+                    if (!match.Success || !Version.TryParse(match.Groups["version"].Value, out availableVersion))
                         {
                         UpdateText = "Could not check for updates";
                         return;
                         }
 
-                    if((version.Major == _version.Major && version.Minor >= _version.Minor) || (version.Major > _version.Major))
+                    if((availableVersion.Major == _currentVersion.Major && availableVersion.Minor <= _currentVersion.Minor) || (availableVersion.Major < _currentVersion.Major))
                         {
                         UpdateText = "Using the latest version.";
                         return;
                         }
 
                     UpdateImage = "../Images/vs/info16.png";
-                    UpdateText = $"New Version available: {version.ToString(2)} built {published_at.ToShortDateString()}";
+                    UpdateText = $"New Version available: {availableVersion.ToString(2)} built {published_at.ToShortDateString()}";
                     DownloadUrl = url;
                     }
                 }
@@ -86,7 +86,7 @@ namespace Builder
                 }
             }
 
-        public string Info => $"Version {_version.ToString(2)}, built {App.LinkerTime.ToShortDateString()}";
+        public string Info => $"Version {_currentVersion.ToString(2)}, built {App.LinkerTime.ToShortDateString()}";
 
         public string UpdateImage { get; set; } = null;
         public string UpdateText { get; set; } = "Checking for Updates...";

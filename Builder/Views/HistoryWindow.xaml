@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Builder"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        xmlns:rsc="clr-namespace:RSCoreLib.WPF;assembly=RSCoreLib"
+        xmlns:rsc="clr-namespace:RSCoreLib.WPF"
         Height="250" MinHeight="100"
         Width="900" MinWidth="400"
         d:DataContext="{d:DesignInstance Type=local:HistoryVM, IsDesignTimeCreatable=True}"
